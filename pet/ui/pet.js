@@ -258,7 +258,131 @@ chatToggle.addEventListener("click", () => {
 });
 chatToggle.classList.add("active");
 
+// ======== Roaming system ========
+
+const roamState = {};
+const ROAM_SPEED = 0.6; // px per frame
+const PET_W = 160;
+const PET_H = 200;
+
+Object.keys(AGENTS).forEach(id => {
+  roamState[id] = { x: 0, y: 0, targetX: 0, targetY: 0, paused: false, hovered: false, initialized: false };
+});
+
+function initRoamPositions() {
+  const container = document.getElementById("agents-row");
+  if (!container) return;
+  const rect = container.getBoundingClientRect();
+  const w = rect.width;
+  const h = rect.height;
+  const ids = Object.keys(AGENTS);
+  ids.forEach((id, i) => {
+    const s = roamState[id];
+    if (!s.initialized) {
+      s.x = (w / (ids.length + 1)) * (i + 1) - PET_W / 2;
+      s.y = h / 2 - PET_H / 2 + (Math.random() - 0.5) * 60;
+      s.targetX = s.x;
+      s.targetY = s.y;
+      s.initialized = true;
+    }
+    applyPosition(id);
+  });
+}
+
+function pickNewTarget(agentId) {
+  const container = document.getElementById("agents-row");
+  if (!container) return;
+  const rect = container.getBoundingClientRect();
+  const margin = 20;
+  const s = roamState[agentId];
+  s.targetX = margin + Math.random() * (rect.width - PET_W - margin * 2);
+  s.targetY = margin + Math.random() * (rect.height - PET_H - margin * 2);
+}
+
+function applyPosition(agentId) {
+  const el = getSlotElements(agentId);
+  if (!el) return;
+  const s = roamState[agentId];
+  el.slot.style.left = s.x + "px";
+  el.slot.style.top = s.y + "px";
+}
+
+function roamTick() {
+  Object.keys(AGENTS).forEach(id => {
+    const s = roamState[id];
+    if (s.paused || s.hovered) return;
+
+    const dx = s.targetX - s.x;
+    const dy = s.targetY - s.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < 2) {
+      // Arrived — idle a bit then pick new target
+      s.paused = true;
+      setAgentGif(id, "idel");
+      const el = getSlotElements(id);
+      if (el) el.slot.classList.remove("walking");
+      setTimeout(() => {
+        s.paused = false;
+        pickNewTarget(id);
+      }, 2000 + Math.random() * 4000);
+      return;
+    }
+
+    const vx = (dx / dist) * ROAM_SPEED;
+    const vy = (dy / dist) * ROAM_SPEED;
+    s.x += vx;
+    s.y += vy;
+    applyPosition(id);
+
+    // Flip based on direction
+    const el = getSlotElements(id);
+    if (el) {
+      el.gif.style.transform = vx < 0 ? "scaleX(-1)" : "scaleX(1)";
+      if (!el.slot.classList.contains("walking")) {
+        el.slot.classList.add("walking");
+        setAgentGif(id, "jump");
+      }
+    }
+  });
+  requestAnimationFrame(roamTick);
+}
+
+// Hover pause
+document.querySelectorAll(".agent-slot").forEach(slot => {
+  const agentId = slot.dataset.agent;
+  slot.addEventListener("mouseenter", () => {
+    roamState[agentId].hovered = true;
+    setAgentGif(agentId, "idel");
+    slot.classList.remove("walking");
+  });
+  slot.addEventListener("mouseleave", () => {
+    roamState[agentId].hovered = false;
+  });
+});
+
 // ======== Init ========
 
 openChatTab("eous");
 showBubble("CLICK A BANGBOO!");
+
+initRoamPositions();
+Object.keys(AGENTS).forEach(id => {
+  setTimeout(() => pickNewTarget(id), 1000 + Math.random() * 2000);
+});
+requestAnimationFrame(roamTick);
+
+window.addEventListener("resize", () => {
+  const container = document.getElementById("agents-row");
+  if (!container) return;
+  const rect = container.getBoundingClientRect();
+  Object.keys(AGENTS).forEach(id => {
+    const s = roamState[id];
+    s.x = Math.min(s.x, rect.width - PET_W - 10);
+    s.y = Math.min(s.y, rect.height - PET_H - 10);
+    s.x = Math.max(10, s.x);
+    s.y = Math.max(10, s.y);
+    applyPosition(id);
+    pickNewTarget(id);
+  });
+});
