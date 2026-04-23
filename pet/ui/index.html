@@ -34,24 +34,38 @@
 
     <!-- Main content -->
     <div id="content-grid">
-      <!-- Left: stats panel -->
+      <!-- Left: agent status panel -->
       <div class="panel panel-left">
-        <div class="panel-header">STATUS</div>
-        <div class="stat-list">
-          <div class="stat-row"><span class="stat-key">MOOD</span><span class="stat-val" id="stat-mood">NEUTRAL</span></div>
-          <div class="stat-row"><span class="stat-key">HP</span><span class="stat-bar"><span class="bar-fill hp" style="width:100%"></span></span></div>
-          <div class="stat-row"><span class="stat-key">EN</span><span class="stat-bar"><span class="bar-fill en" style="width:75%"></span></span></div>
-          <div class="stat-row"><span class="stat-key">LV</span><span class="stat-val">01</span></div>
+        <div class="panel-header">AGENTS</div>
+
+        <div class="agent-card" data-agent="eous">
+          <div class="agent-card-header">
+            <span class="agent-card-name">EOUS</span>
+            <span class="agent-card-status" id="status-eous">IDLE</span>
+          </div>
+          <div class="stat-row"><span class="stat-key">CTX</span><span class="stat-bar"><span class="bar-fill hp agent-ctx-bar" style="width:100%"></span></span></div>
+          <div class="stat-row"><span class="stat-key">MSG</span><span class="stat-val agent-msg-count">0</span></div>
+          <div class="stat-row"><span class="stat-key">SES</span><span class="stat-val agent-session-id">—</span></div>
         </div>
-        <div class="panel-header" style="margin-top:12px;">MODULES</div>
-        <div class="module-grid">
-          <div class="module-item active">EAR</div>
-          <div class="module-item active">LED</div>
-          <div class="module-item active">ARM</div>
-          <div class="module-item">PWR</div>
+
+        <div class="agent-card" data-agent="amillion">
+          <div class="agent-card-header">
+            <span class="agent-card-name">AMILLION</span>
+            <span class="agent-card-status" id="status-amillion">IDLE</span>
+          </div>
+          <div class="stat-row"><span class="stat-key">CTX</span><span class="stat-bar"><span class="bar-fill hp agent-ctx-bar" style="width:100%"></span></span></div>
+          <div class="stat-row"><span class="stat-key">MSG</span><span class="stat-val agent-msg-count">0</span></div>
+          <div class="stat-row"><span class="stat-key">SES</span><span class="stat-val agent-session-id">—</span></div>
         </div>
-        <div class="pixel-decor">
-          <div class="pixel-diamond"></div>
+
+        <div class="agent-card" data-agent="penguin">
+          <div class="agent-card-header">
+            <span class="agent-card-name">PENGUIN</span>
+            <span class="agent-card-status" id="status-penguin">IDLE</span>
+          </div>
+          <div class="stat-row"><span class="stat-key">CTX</span><span class="stat-bar"><span class="bar-fill hp agent-ctx-bar" style="width:100%"></span></span></div>
+          <div class="stat-row"><span class="stat-key">MSG</span><span class="stat-val agent-msg-count">0</span></div>
+          <div class="stat-row"><span class="stat-key">SES</span><span class="stat-val agent-session-id">—</span></div>
         </div>
       </div>
 
@@ -92,7 +106,7 @@
           </div>
 
           <!-- MS (bottom-right) -->
-          <div class="px-bldg bldg-chinese" style="bottom:2%;right:4%;transform:scale(1.8);transform-origin:bottom right">
+          <div class="px-bldg bldg-chinese" style="bottom:8%;right:12%;transform:scale(1.8);transform-origin:bottom right">
             <div class="upper"></div>
             <div class="wall"></div>
             <div class="sign">食堂</div>
@@ -143,21 +157,21 @@
               <img class="agent-gif" src="/ui/pet/gif/eous-idel.gif" draggable="false">
             </div>
             <div class="agent-name-tag">EOUS</div>
-            <div class="agent-shadow"></div>
+            <div class="agent-shadow"><div class="ctx-fill"></div></div>
           </div>
           <div class="agent-slot" data-agent="amillion">
             <div class="agent-pet">
               <img class="agent-gif" src="/ui/pet/gif/amillion-idel.gif" draggable="false">
             </div>
             <div class="agent-name-tag">AMILLION</div>
-            <div class="agent-shadow"></div>
+            <div class="agent-shadow"><div class="ctx-fill"></div></div>
           </div>
           <div class="agent-slot" data-agent="penguin">
             <div class="agent-pet">
               <img class="agent-gif" src="/ui/pet/gif/enguin-idel.gif" draggable="false">
             </div>
             <div class="agent-name-tag">PENGUIN</div>
-            <div class="agent-shadow"></div>
+            <div class="agent-shadow"><div class="ctx-fill"></div></div>
           </div>
         </div>
       </div>

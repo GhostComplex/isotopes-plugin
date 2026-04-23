@@ -159,6 +159,7 @@ body {
 #content-grid {
   display: grid;
   grid-template-columns: 200px 1fr 420px;
+  grid-template-rows: 1fr;
   flex: 1;
   min-height: 0;
   transition: grid-template-columns 0.3s;
@@ -179,6 +180,8 @@ body {
 .panel {
   border-right: 2px solid var(--border);
   position: relative;
+  overflow: hidden;
+  min-height: 0;
 }
 .panel:last-child { border-right: none; }
 
@@ -228,10 +231,12 @@ body {
   background: var(--bg);
   border: 1px solid var(--border);
   position: relative;
+  overflow: hidden;
 }
 
 .bar-fill {
-  height: 100%;
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
   transition: width 0.3s;
 }
 .bar-fill.hp { background: var(--green); box-shadow: 0 0 6px rgba(77,255,124,0.3); }
@@ -255,6 +260,36 @@ body {
   color: var(--green);
   border-color: var(--green-dim);
   background: rgba(77,255,124,0.05);
+}
+
+/* Agent status cards */
+.agent-card {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.agent-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.agent-card-name {
+  font-size: 8px;
+  color: var(--green);
+  letter-spacing: 1px;
+}
+.agent-card-status {
+  font-size: 6px;
+  color: var(--text-dim);
+  padding: 1px 4px;
+  border: 1px solid var(--border);
+}
+.agent-card-status.active {
+  color: var(--orange);
+  border-color: var(--orange-dim);
 }
 
 .pixel-decor {
@@ -1077,10 +1112,24 @@ body {
 
 .agent-shadow {
   width: 110px;
-  height: 8px;
-  background: rgba(77,255,124,0.06);
-  border: 1px solid rgba(77,255,124,0.08);
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
   margin-top: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.agent-shadow .ctx-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 100%;
+  background: var(--green);
+  box-shadow: 0 0 4px rgba(77,255,124,0.3);
+  transition: width 0.5s ease;
+}
+.agent-shadow.ctx-warn .ctx-fill {
+  background: var(--orange);
+  box-shadow: 0 0 4px rgba(255,106,47,0.3);
 }
 
 /* Click / action animations on agent-pet */
@@ -1156,6 +1205,8 @@ body {
   flex-direction: row;
   border-right: none;
   overflow: hidden;
+  min-height: 0;
+  height: 100%;
 }
 
 .chat-tabs {
@@ -1163,16 +1214,21 @@ body {
   flex-direction: row;
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  height: 100%;
 }
 
 .chat-tab {
   display: flex;
   flex-direction: row;
   min-width: 0;
+  min-height: 0;
   border-left: 1px solid var(--border);
   overflow: hidden;
   transition: flex 0.3s;
   flex: 0 0 auto;
+  position: relative;
 }
 
 .chat-tab.active {
@@ -1213,18 +1269,21 @@ body {
   flex: 1;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
+  height: 100%;
 }
 .chat-tab.active .chat-tab-body {
   display: flex;
 }
 
 .chat-tab-messages {
-  flex: 1;
+  flex: 1 1 0;
   overflow-y: auto;
   padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-height: 0;
 }
 .chat-tab-messages::-webkit-scrollbar { width: 4px; }
 .chat-tab-messages::-webkit-scrollbar-track { background: var(--bg); }
@@ -1236,6 +1295,7 @@ body {
   gap: 4px;
   border-top: 2px solid var(--border);
   background: var(--panel);
+  flex-shrink: 0;
 }
 
 .chat-tab-input {

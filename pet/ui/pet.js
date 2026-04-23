@@ -140,6 +140,7 @@ async function sendGroupMessage(text) {
 
   for (const agentId of activeAgents) {
     const sessionId = await ensureSession(agentId);
+    setAgentStatus(agentId, "CHAT");
     const enrichedText = buildGroupContext(text);
 
     const assistantDiv = addGroupMessage("assistant", "", agentId);
@@ -197,12 +198,14 @@ async function sendGroupMessage(text) {
       saveGroupState();
       showBubble(fullText);
     }
+    setAgentStatus(agentId, "IDLE");
   }
 
   groupHistory.push({ sender: "USER", body: text });
   while (groupHistory.length > MAX_GROUP_HISTORY) groupHistory.shift();
   saveGroupState();
 
+  updateAllCtxBars();
   if (gt) { gt.input.disabled = false; gt.form.querySelector("button").disabled = false; gt.input.focus(); }
 }
 
@@ -295,6 +298,7 @@ async function ensureSession(agentId) {
   const data = await res.json();
   agent.session = data.sessionId;
   if (data.resumed) await loadHistory(agentId);
+  updateCtxBar(agentId);
   return agent.session;
 }
 
@@ -335,6 +339,7 @@ async function sendMessage(agentId, text) {
   const t = agentTabs[agentId];
   if (t) { t.input.disabled = true; t.form.querySelector("button").disabled = true; }
 
+  setAgentStatus(agentId, "CHAT");
   const assistantDiv = addMessage("assistant", "", agentId);
   let fullText = "";
 
@@ -376,6 +381,8 @@ async function sendMessage(agentId, text) {
   }
 
   if (fullText) showBubble(fullText);
+  setAgentStatus(agentId, "IDLE");
+  updateCtxBar(agentId);
   if (t) { t.input.disabled = false; t.form.querySelector("button").disabled = false; t.input.focus(); }
 }
 
@@ -409,6 +416,53 @@ function showBubble(text) {
   bubble.classList.remove("hidden");
   clearTimeout(bubbleTimer);
   bubbleTimer = setTimeout(() => bubble.classList.add("hidden"), 4000);
+}
+
+// ======== Context window bar ========
+
+const MAX_CTX_MESSAGES = 40;
+
+async function updateCtxBar(agentId) {
+  const agent = AGENTS[agentId];
+  if (!agent.session) return;
+  try {
+    const res = await fetch(`${API}/api/chat/sessions/${agent.session}/messages`);
+    const data = await res.json();
+    const count = data.messages?.length || 0;
+    const used = Math.min(100, (count / MAX_CTX_MESSAGES) * 100);
+    const remaining = 100 - used;
+
+    // Update pet shadow bar
+    const slot = document.querySelector(`.agent-slot[data-agent="${agentId}"]`);
+    if (slot) {
+      const shadow = slot.querySelector(".agent-shadow");
+      const fill = slot.querySelector(".ctx-fill");
+      if (fill) fill.style.width = remaining + "%";
+      if (shadow) shadow.classList.toggle("ctx-warn", remaining < 30);
+    }
+
+    // Update left panel card
+    const card = document.querySelector(`.agent-card[data-agent="${agentId}"]`);
+    if (card) {
+      const ctxBar = card.querySelector(".agent-ctx-bar");
+      if (ctxBar) ctxBar.style.width = remaining + "%";
+      const msgCount = card.querySelector(".agent-msg-count");
+      if (msgCount) msgCount.textContent = count;
+      const sesId = card.querySelector(".agent-session-id");
+      if (sesId) sesId.textContent = agent.session.slice(0, 8);
+    }
+  } catch (_) {}
+}
+
+function updateAllCtxBars() {
+  Object.keys(AGENTS).forEach(id => updateCtxBar(id));
+}
+
+function setAgentStatus(agentId, status) {
+  const el = document.getElementById(`status-${agentId}`);
+  if (!el) return;
+  el.textContent = status;
+  el.classList.toggle("active", status !== "IDLE");
 }
 
 // ======== Event listeners ========
