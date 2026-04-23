@@ -339,9 +339,9 @@ body {
 #messages::-webkit-scrollbar-thumb { background: var(--border); }
 
 .msg {
-  font-size: 7px;
-  line-height: 1.8;
-  padding: 6px 8px;
+  font-size: 9px;
+  line-height: 2;
+  padding: 8px 10px;
   word-wrap: break-word;
   border: 1px solid var(--border);
   max-width: 95%;
@@ -349,23 +349,24 @@ body {
 .msg.user {
   align-self: flex-end;
   background: var(--orange);
-  color: var(--bg);
+  color: #fff;
   border-color: var(--orange-dim);
+  font-weight: 600;
 }
 .msg.assistant {
   align-self: flex-start;
-  background: var(--bg);
-  color: var(--green);
+  background: rgba(77,255,124,0.08);
+  color: #b0ffc8;
   border-color: var(--green-dim);
-  text-shadow: 0 0 4px rgba(77,255,124,0.2);
+  text-shadow: 0 0 6px rgba(77,255,124,0.3);
 }
 .msg.tool {
   align-self: center;
   background: transparent;
   color: var(--text-dim);
   border-color: var(--border);
-  font-size: 6px;
-  padding: 2px 8px;
+  font-size: 7px;
+  padding: 3px 8px;
 }
 
 #chat-form {
