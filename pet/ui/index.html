@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Pet</title>
+  <link rel="stylesheet" href="/ui/pet/style.css">
+</head>
+<body>
+  <!-- Top browser-like bar -->
+  <div id="top-bar">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="title-bar">
+      <strong>Bangboo Terminal</strong>
+      <span class="sep">/</span>
+      <span class="subtitle">v0.1.0</span>
+    </div>
+    <button id="clear-btn">CLR</button>
+  </div>
+
+  <!-- Main frame -->
+  <div id="frame">
+    <div class="scanlines"></div>
+
+    <!-- Title area -->
+    <div id="title-area">
+      <h1>BANGBOO <span class="blink">_</span></h1>
+      <div class="subtitle-row">
+        <span class="tag">UNIT-07</span>
+        <span class="tag orange">ACTIVE</span>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div id="content-grid">
+      <!-- Left: stats panel -->
+      <div class="panel panel-left">
+        <div class="panel-header">STATUS</div>
+        <div class="stat-list">
+          <div class="stat-row"><span class="stat-key">MOOD</span><span class="stat-val" id="stat-mood">NEUTRAL</span></div>
+          <div class="stat-row"><span class="stat-key">HP</span><span class="stat-bar"><span class="bar-fill hp" style="width:100%"></span></span></div>
+          <div class="stat-row"><span class="stat-key">EN</span><span class="stat-bar"><span class="bar-fill en" style="width:75%"></span></span></div>
+          <div class="stat-row"><span class="stat-key">LV</span><span class="stat-val">01</span></div>
+        </div>
+        <div class="panel-header" style="margin-top:12px;">MODULES</div>
+        <div class="module-grid">
+          <div class="module-item active">EAR</div>
+          <div class="module-item active">LED</div>
+          <div class="module-item active">ARM</div>
+          <div class="module-item">PWR</div>
+        </div>
+        <div class="pixel-decor">
+          <div class="pixel-diamond"></div>
+        </div>
+      </div>
+
+      <!-- Center: pet display -->
+      <div class="panel panel-center">
+        <!-- Pixel grid background -->
+        <div class="pixel-grid-bg"></div>
+
+        <!-- Platform -->
+        <div id="pet-platform">
+          <div id="pet" data-mood="neutral">
+            <!-- Pixel Bangboo -->
+            <div class="bangboo">
+              <!-- Ears -->
+              <div class="p-ear p-ear-l">
+                <div class="p-ear-inner"></div>
+              </div>
+              <div class="p-ear p-ear-r">
+                <div class="p-ear-inner"></div>
+              </div>
+              <!-- Head -->
+              <div class="p-head">
+                <div class="p-screen">
+                  <div class="p-eye p-eye-l"></div>
+                  <div class="p-eye p-eye-r"></div>
+                  <div class="p-mouth"></div>
+                </div>
+              </div>
+              <!-- Body -->
+              <div class="p-body">
+                <div class="p-belt"></div>
+                <div class="p-arm p-arm-l"></div>
+                <div class="p-arm p-arm-r"></div>
+              </div>
+              <!-- Feet -->
+              <div class="p-feet">
+                <div class="p-foot p-foot-l"></div>
+                <div class="p-foot p-foot-r"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Shadow -->
+          <div class="pet-shadow"></div>
+        </div>
+
+        <div id="mood-label"><span id="mood-text">NEUTRAL</span></div>
+      </div>
+
+      <!-- Right: chat log -->
+      <div class="panel panel-right">
+        <div class="panel-header">COMMS LOG</div>
+        <div id="messages"></div>
+        <form id="chat-form">
+          <input type="text" id="chat-input" placeholder="> SAY..." autocomplete="off">
+          <button type="submit">▶</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer">
+      <span>NEW ERIDU — LOGISTICS DIV.</span>
+      <span class="footer-ver">SYS.8BIT</span>
+    </div>
+  </div>
+
+  <!-- Speech bubble (floating over pet) -->
+  <div id="speech-bubble" class="hidden"></div>
+
+  <script src="/ui/pet/pet.js"></script>
+</body>
+</html>
