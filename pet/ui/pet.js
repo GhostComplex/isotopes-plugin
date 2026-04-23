@@ -585,7 +585,7 @@ function applyPosition(agentId) {
 
 function checkCollisions() {
   const ids = Object.keys(AGENTS);
-  const collisionDist = 100;
+  const collisionDist = 200;
   for (let i = 0; i < ids.length; i++) {
     for (let j = i + 1; j < ids.length; j++) {
       const a = roamState[ids[i]];
