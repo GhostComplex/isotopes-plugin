@@ -288,53 +288,18 @@ body {
   border: 1px solid rgba(77,255,124,0.1);
 }
 
-/* ======== BANGBOO SPRITE ======== */
+/* ======== BANGBOO SPRITE CANVAS ======== */
 
 #pet {
-  width: 200px;
-  height: 240px;
+  width: 256px;
+  height: 416px;
   cursor: pointer;
   user-select: none;
-  position: relative;
-  transition: transform 0.2s;
-  z-index: 3;
-}
-#pet:hover { transform: scale(1.04); filter: brightness(1.15); }
-#pet:active { transform: scale(0.94); }
-
-.bangboo-sprite {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
   image-rendering: pixelated;
   -ms-interpolation-mode: nearest-neighbor;
-  pointer-events: none;
-  filter: drop-shadow(0 0 12px rgba(77,255,124,0.15));
+  transition: filter 0.2s;
 }
-
-/* Eye glow overlays (positioned over the sprite's eyes) */
-.mood-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-.eye-glow {
-  position: absolute;
-  width: 28px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(77,255,124,0.15);
-  filter: blur(8px);
-  transition: all 0.4s;
-  /* Positioned to match the sprite's eye locations */
-  top: 38%;
-}
-.eye-glow-l { left: 28%; }
-.eye-glow-r { right: 28%; }
+#pet:active { transform: scale(0.94); }
 
 /* Mood label */
 #mood-label {
@@ -350,30 +315,6 @@ body {
   border: 2px solid var(--orange-dim);
   text-shadow: none;
 }
-
-/* ======== MOOD — eye glow color changes ======== */
-
-[data-mood="happy"] .eye-glow { background: rgba(127,255,127,0.25); }
-[data-mood="happy"] .bangboo-sprite { filter: drop-shadow(0 0 16px rgba(127,255,127,0.2)); }
-
-[data-mood="sad"] .eye-glow { background: rgba(77,255,124,0.06); }
-[data-mood="sad"] .bangboo-sprite { filter: drop-shadow(0 0 6px rgba(77,255,124,0.05)) brightness(0.85); }
-
-[data-mood="excited"] .eye-glow { background: rgba(204,255,0,0.3); }
-[data-mood="excited"] .bangboo-sprite { filter: drop-shadow(0 0 20px rgba(204,255,0,0.2)); }
-
-[data-mood="sleepy"] .eye-glow { background: rgba(77,255,124,0.04); }
-[data-mood="sleepy"] .bangboo-sprite { filter: drop-shadow(0 0 4px rgba(77,255,124,0.05)) brightness(0.7); }
-
-[data-mood="angry"] .eye-glow { background: rgba(255,51,51,0.3); }
-[data-mood="angry"] .bangboo-sprite { filter: drop-shadow(0 0 16px rgba(255,51,51,0.25)); }
-
-[data-mood="love"] .eye-glow { background: rgba(255,106,138,0.3); }
-[data-mood="love"] .bangboo-sprite { filter: drop-shadow(0 0 16px rgba(255,106,138,0.2)); }
-
-[data-mood="confused"] .eye-glow-l { background: rgba(77,255,124,0.2); width: 32px; }
-[data-mood="confused"] .eye-glow-r { background: rgba(77,255,124,0.08); width: 20px; }
-[data-mood="confused"] .bangboo-sprite { filter: drop-shadow(0 0 8px rgba(77,255,124,0.1)); }
 
 /* ======== RIGHT PANEL: CHAT ======== */
 
@@ -573,18 +514,7 @@ body {
 .anim-nod { animation: nod 0.4s steps(4) 2 !important; }
 .anim-poke { animation: poke 0.25s steps(4) !important; }
 
-.mood-change .bangboo-sprite {
-  animation: glitch 0.3s steps(4);
-}
-
-/* Eye glow pulse */
-@keyframes eye-glow-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-#pet:not([class*="anim-"]) .eye-glow {
-  animation: eye-glow-pulse 2s steps(4) infinite;
-}
+/* Animations are handled by sprite engine now */
 
 /* ======== RESPONSIVE ======== */
 

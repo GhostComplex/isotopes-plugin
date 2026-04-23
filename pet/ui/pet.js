@@ -1,7 +1,8 @@
-// plugins/pet/ui/pet.js — Virtual Pet frontend (8-bit terminal)
+// plugins/pet/ui/pet.js — Sprite-animated Virtual Pet
 
 const API = window.location.origin;
-const pet = document.getElementById("pet");
+const canvas = document.getElementById("pet");
+const ctx = canvas.getContext("2d");
 const bubble = document.getElementById("speech-bubble");
 const moodText = document.getElementById("mood-text");
 const statMood = document.getElementById("stat-mood");
@@ -12,6 +13,151 @@ const clearBtn = document.getElementById("clear-btn");
 
 let sessionId = null;
 let bubbleTimer = null;
+
+// ---- Sprite engine ----
+
+const SHEET_IMG = new Image();
+SHEET_IMG.src = "/ui/pet/bangboo-sheet.png";
+
+let manifest = null;
+let currentAnim = "idle";
+let currentFrame = 0;
+let frameTimer = 0;
+let lastTime = 0;
+let animQueue = [];      // queued one-shot animations
+let looping = true;      // is current anim looping?
+let currentMood = "neutral";
+
+const FPS = {
+  idle: 4,     // slow breathing
+  bounce: 10,
+  jump: 10,
+  poke: 12,
+  shake: 12,
+  spin: 10,
+  dance: 8,
+  wave: 6,
+  nod: 8,
+  sleep: 3,
+};
+
+async function loadManifest() {
+  const res = await fetch("/ui/pet/bangboo-manifest.json");
+  manifest = await res.json();
+}
+
+function drawFrame() {
+  if (!manifest) return;
+  const anim = manifest.animations[currentAnim];
+  if (!anim) return;
+
+  const scale = manifest.scale;
+  const fw = anim.frameWidth * scale;
+  const fh = anim.frameHeight * scale;
+  const sx = currentFrame * fw;
+  const sy = anim.row * fh;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(SHEET_IMG, sx, sy, fw, fh, 0, 0, canvas.width, canvas.height);
+}
+
+function tick(time) {
+  if (!lastTime) lastTime = time;
+  const dt = time - lastTime;
+  lastTime = time;
+
+  if (manifest && SHEET_IMG.complete) {
+    const fps = FPS[currentAnim] || 8;
+    frameTimer += dt;
+    if (frameTimer >= 1000 / fps) {
+      frameTimer = 0;
+      const anim = manifest.animations[currentAnim];
+      if (anim) {
+        currentFrame++;
+        if (currentFrame >= anim.frames) {
+          if (looping) {
+            currentFrame = 0;
+          } else {
+            // One-shot done — go to next in queue or back to idle/mood
+            currentFrame = anim.frames - 1;
+            if (animQueue.length > 0) {
+              const next = animQueue.shift();
+              playAnim(next.name, next.loop);
+            } else {
+              // Return to mood sprite or idle
+              const moodAnim = "mood_" + currentMood;
+              if (manifest.animations[moodAnim]) {
+                currentAnim = moodAnim;
+                currentFrame = 0;
+                looping = false;
+              } else {
+                currentAnim = "idle";
+                currentFrame = 0;
+                looping = true;
+              }
+            }
+          }
+        }
+      }
+      drawFrame();
+    }
+  }
+
+  requestAnimationFrame(tick);
+}
+
+function playAnim(name, loop = false) {
+  if (!manifest || !manifest.animations[name]) return;
+  currentAnim = name;
+  currentFrame = 0;
+  frameTimer = 0;
+  looping = loop;
+}
+
+function queueAnim(name) {
+  animQueue.push({ name, loop: false });
+}
+
+// Map tool actions to sprite anims
+const ACTION_MAP = {
+  jump: "jump",
+  spin: "spin",
+  shake: "shake",
+  wave: "wave",
+  dance: "dance",
+  sleep: "sleep",
+  bounce: "bounce",
+  nod: "nod",
+  poke: "poke",
+};
+
+function playAnimation(action) {
+  const animName = ACTION_MAP[action];
+  if (animName) {
+    const isLoop = action === "sleep";
+    playAnim(animName, isLoop);
+  }
+}
+
+function setMood(mood) {
+  currentMood = mood;
+  const upper = mood.toUpperCase();
+  if (moodText) moodText.textContent = upper;
+  if (statMood) statMood.textContent = upper;
+
+  // Show mood sprite briefly, then back to idle
+  const moodAnim = "mood_" + mood;
+  if (manifest && manifest.animations[moodAnim]) {
+    playAnim(moodAnim, false);
+    // After a beat, return to idle
+    setTimeout(() => {
+      if (currentAnim === moodAnim) {
+        playAnim("idle", true);
+      }
+    }, 1500);
+  }
+}
 
 // ---- Session ----
 
@@ -113,27 +259,6 @@ function handleSSE(event, data, assistantDiv) {
   }
 }
 
-// ---- Pet Mood & Animation ----
-
-function setMood(mood) {
-  pet.dataset.mood = mood;
-  const upper = mood.toUpperCase();
-  moodText.textContent = upper;
-  if (statMood) statMood.textContent = upper;
-  pet.classList.add("mood-change");
-  setTimeout(() => pet.classList.remove("mood-change"), 400);
-}
-
-function playAnimation(action) {
-  const cls = `anim-${action}`;
-  pet.classList.remove(...[...pet.classList].filter(c => c.startsWith("anim-")));
-  void pet.offsetWidth;
-  pet.classList.add(cls);
-  if (action !== "sleep") {
-    pet.addEventListener("animationend", () => pet.classList.remove(cls), { once: true });
-  }
-}
-
 function showBubble(text) {
   const short = text.length > 50 ? text.slice(0, 47) + "..." : text;
   bubble.textContent = short;
@@ -142,14 +267,20 @@ function showBubble(text) {
   bubbleTimer = setTimeout(() => bubble.classList.add("hidden"), 4000);
 }
 
-// ---- Click / touch ----
+// ---- Interactions ----
 
-pet.addEventListener("click", () => {
-  playAnimation("poke");
+canvas.addEventListener("click", () => {
+  playAnim("poke", false);
   sendMessage("*用户戳了你一下*");
 });
 
-// ---- Form submit ----
+// Hover effect
+canvas.addEventListener("mouseenter", () => {
+  canvas.style.filter = "brightness(1.15)";
+});
+canvas.addEventListener("mouseleave", () => {
+  canvas.style.filter = "";
+});
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -159,15 +290,26 @@ form.addEventListener("submit", (e) => {
   sendMessage(text);
 });
 
-// ---- Clear ----
-
 clearBtn.addEventListener("click", () => {
   sessionId = null;
-  setMood("neutral");
+  currentMood = "neutral";
+  if (moodText) moodText.textContent = "NEUTRAL";
+  if (statMood) statMood.textContent = "NEUTRAL";
   messagesEl.innerHTML = "";
+  playAnim("idle", true);
   showBubble("SYS RESET OK");
 });
 
 // ---- Init ----
 
-showBubble("CLICK ME!");
+async function init() {
+  await loadManifest();
+  SHEET_IMG.onload = () => {
+    drawFrame();
+  };
+  if (SHEET_IMG.complete) drawFrame();
+  requestAnimationFrame(tick);
+  showBubble("CLICK ME!");
+}
+
+init();

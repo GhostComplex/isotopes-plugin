@@ -1,0 +1,113 @@
+{
+  "scale": 4,
+  "animations": {
+    "idle": {
+      "row": 0,
+      "frames": 4,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "bounce": {
+      "row": 1,
+      "frames": 6,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "jump": {
+      "row": 2,
+      "frames": 8,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "poke": {
+      "row": 3,
+      "frames": 6,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "shake": {
+      "row": 4,
+      "frames": 6,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "spin": {
+      "row": 5,
+      "frames": 8,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "dance": {
+      "row": 6,
+      "frames": 8,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "wave": {
+      "row": 7,
+      "frames": 6,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "nod": {
+      "row": 8,
+      "frames": 4,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "sleep": {
+      "row": 9,
+      "frames": 4,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "mood_happy": {
+      "row": 10,
+      "frames": 1,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "mood_sad": {
+      "row": 11,
+      "frames": 1,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "mood_excited": {
+      "row": 12,
+      "frames": 1,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "mood_angry": {
+      "row": 13,
+      "frames": 1,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "mood_love": {
+      "row": 14,
+      "frames": 1,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "mood_confused": {
+      "row": 15,
+      "frames": 1,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "mood_sleepy": {
+      "row": 16,
+      "frames": 1,
+      "frameWidth": 64,
+      "frameHeight": 104
+    },
+    "mood_neutral": {
+      "row": 17,
+      "frames": 1,
+      "frameWidth": 64,
+      "frameHeight": 104
+    }
+  }
+}
