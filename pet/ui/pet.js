@@ -519,6 +519,21 @@ const PET_H = 260;
 
 let buildingBoxes = [];
 
+const BUILDING_MESSAGES = {
+  "bldg-arcade": ["开始搬砖 💼", "又要加班了...", "今天OKR写了吗？", "Teams又卡了", "Copilot帮我写吧"],
+  "bldg-ramen": ["买瓶水 🥤", "有没有零食？", "便利店真方便", "买个饭团吧"],
+  "bldg-coffee": ["来杯咖啡 ☕", "困了...", "今天第几杯了？", "美式还是拿铁？"],
+  "bldg-chinese": ["好饿啊 🍜", "今天吃什么？", "食堂排队好长", "干饭！"],
+  "bldg-tech": ["练练腿 💪", "该运动了", "摸鱼去健身", "跑步机走起"],
+};
+
+function getBuildingName(bldg) {
+  for (const cls of bldg.classList) {
+    if (cls.startsWith("bldg-")) return cls;
+  }
+  return null;
+}
+
 function updateBuildingBoxes() {
   const container = document.getElementById("agents-row");
   if (!container) return;
@@ -531,6 +546,7 @@ function updateBuildingBoxes() {
       y: br.top - cr.top,
       w: br.width,
       h: br.height,
+      name: getBuildingName(bldg),
     });
   });
 }
@@ -544,6 +560,14 @@ function hitsBuilding(px, py) {
     if (rectsOverlap(px, py, PET_W, PET_H, b.x, b.y, b.w, b.h)) return true;
   }
   return false;
+}
+
+function nearbyBuilding(px, py) {
+  const pad = 30;
+  for (const b of buildingBoxes) {
+    if (rectsOverlap(px - pad, py - pad, PET_W + pad * 2, PET_H + pad * 2, b.x, b.y, b.w, b.h)) return b.name;
+  }
+  return null;
 }
 
 Object.keys(AGENTS).forEach(id => {
@@ -642,11 +666,18 @@ function roamTick() {
     const dist = Math.sqrt(dx * dx + dy * dy);
 
     if (dist < 2) {
-      // Arrived — idle a bit then pick new target
       s.paused = true;
       setAgentGif(id, "idel");
       const el = getSlotElements(id);
       if (el) el.slot.classList.remove("walking");
+
+      const bldg = nearbyBuilding(s.x, s.y);
+      if (bldg && BUILDING_MESSAGES[bldg] && Math.random() < 0.8) {
+        const msgs = BUILDING_MESSAGES[bldg];
+        const msg = msgs[Math.floor(Math.random() * msgs.length)];
+        showBubble(msg, id);
+      }
+
       setTimeout(() => {
         s.paused = false;
         pickNewTarget(id);
