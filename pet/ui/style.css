@@ -315,7 +315,7 @@ body {
   padding: 0;
   position: relative;
   overflow: hidden;
-  background: #2a2a2e;
+  background: #1a1a1e;
 }
 
 .pixel-grid-bg {
@@ -330,7 +330,7 @@ body {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-  background: #2a2a2e;
+  background: #1a1a1e;
 }
 
 /* Ground tile texture */
@@ -850,7 +850,7 @@ body {
   position: absolute;
   bottom: 0; left: 0; right: 0;
   height: 6px;
-  background: linear-gradient(90deg, var(--green-dim), var(--orange-dim), var(--green-dim));
+  background: linear-gradient(90deg, #F25022, #7FBA00, #00A4EF, #FFB900);
   opacity: 0.6;
 }
 /* Upper structure */
@@ -871,19 +871,19 @@ body {
 /* Main sign */
 .bldg-arcade .arcade-sign {
   position: absolute;
-  top: 30px; left: 50%;
+  top: 18px; left: 50%;
   transform: translateX(-50%);
   width: 60px; height: 14px;
   background: #1a1a20;
-  border: 2px solid var(--green);
+  border: 2px solid #00A4EF;
   font-family: 'Press Start 2P', monospace;
   font-size: 6px;
-  color: var(--green);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-shadow: 0 0 6px rgba(77,255,124,0.6);
-  box-shadow: 0 0 8px rgba(77,255,124,0.3), inset 0 0 6px rgba(77,255,124,0.1);
+  text-shadow: 0 0 6px rgba(0,164,239,0.6);
+  box-shadow: 0 0 8px rgba(0,164,239,0.3), inset 0 0 6px rgba(0,164,239,0.1);
   animation: neon-pulse 2.5s ease-in-out infinite;
 }
 /* Japanese sub-sign */
@@ -903,10 +903,10 @@ body {
   bottom: 34px; left: 2px; right: 2px;
   height: 4px;
   background: repeating-linear-gradient(90deg,
-    var(--green) 0px, var(--green) 4px,
-    var(--orange) 4px, var(--orange) 8px,
-    var(--green-dim) 8px, var(--green-dim) 12px,
-    var(--orange-dim) 12px, var(--orange-dim) 16px
+    #F25022 0px, #F25022 4px,
+    #7FBA00 4px, #7FBA00 8px,
+    #00A4EF 8px, #00A4EF 12px,
+    #FFB900 12px, #FFB900 16px
   );
   animation: marquee-scroll 3s linear infinite;
 }
@@ -918,9 +918,9 @@ body {
 .bldg-arcade .arcade-screen {
   position: absolute;
   width: 16px; height: 14px;
-  background: #0e1e14;
+  background: #0a1e2e;
   border: 2px solid #222228;
-  box-shadow: 0 0 6px rgba(77,255,124,0.2);
+  box-shadow: 0 0 6px rgba(0,164,239,0.2);
   animation: screen-flicker 5s ease-in-out infinite;
 }
 .bldg-arcade .arcade-screen::before {
@@ -945,7 +945,7 @@ body {
   width: 16px; height: 20px;
   background: #1a1a20;
   border: 2px solid #222228;
-  box-shadow: inset 0 0 6px rgba(77,255,124,0.1);
+  box-shadow: inset 0 0 6px rgba(0,164,239,0.1);
 }
 .bldg-arcade .arcade-door::before {
   content: "";
@@ -953,16 +953,16 @@ body {
   top: 50%; left: 50%;
   transform: translate(-50%,-50%);
   width: 2px; height: 8px;
-  background: rgba(77,255,124,0.3);
+  background: rgba(0,164,239,0.3);
 }
 .bldg-arcade .arcade-door::after {
   content: "";
   position: absolute;
   top: 6px; right: 2px;
   width: 2px; height: 2px;
-  background: var(--green);
+  background: #00A4EF;
   border-radius: 50%;
-  box-shadow: 0 0 3px rgba(77,255,124,0.5);
+  box-shadow: 0 0 3px rgba(0,164,239,0.5);
 }
 /* Rooftop AC units */
 .bldg-arcade .arcade-ac {
@@ -1008,10 +1008,10 @@ body {
 /* Neon accent line */
 .bldg-arcade .arcade-neon {
   position: absolute;
-  bottom: 56px; left: 4px; right: 4px;
+  bottom: 58px; left: 4px; right: 4px;
   height: 2px;
-  background: linear-gradient(90deg, var(--green), var(--orange), var(--green));
-  box-shadow: 0 0 6px rgba(77,255,124,0.4);
+  background: linear-gradient(90deg, #F25022, #7FBA00, #00A4EF, #FFB900);
+  box-shadow: 0 0 6px rgba(0,164,239,0.4);
   animation: neon-pulse 2s ease-in-out infinite;
 }
 /* Posters */
@@ -1411,23 +1411,28 @@ body {
 
 #speech-bubble {
   position: fixed;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--bg);
+  background: rgba(12,12,14,0.75);
+  backdrop-filter: blur(4px);
   color: var(--green);
   font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
+  font-size: 11px;
   line-height: 1.8;
-  border: 2px solid var(--green-dim);
+  border: 1.5px solid rgba(77,255,124,0.3);
+  border-radius: 12px;
   padding: 10px 16px;
-  max-width: 260px;
+  max-width: 220px;
   text-align: center;
-  box-shadow: 0 0 16px rgba(77,255,124,0.15), 4px 4px 0 var(--bg);
+  box-shadow: 0 0 16px rgba(77,255,124,0.1);
   z-index: 100;
   transition: opacity 0.3s;
   pointer-events: none;
   text-shadow: 0 0 6px rgba(77,255,124,0.3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-all;
 }
 #speech-bubble.hidden { opacity: 0; }
 

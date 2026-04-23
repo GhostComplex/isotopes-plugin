@@ -196,7 +196,7 @@ async function sendGroupMessage(text) {
       while (groupHistory.length > MAX_GROUP_HISTORY) groupHistory.shift();
       groupDisplayMessages.push({ className: `msg assistant msg-${agentId}`, text: assistantDiv.textContent });
       saveGroupState();
-      showBubble(fullText);
+      showBubble(fullText, agentId);
     }
     setAgentStatus(agentId, "IDLE");
   }
@@ -380,7 +380,7 @@ async function sendMessage(agentId, text) {
     assistantDiv.textContent += " [ERR]";
   }
 
-  if (fullText) showBubble(fullText);
+  if (fullText) showBubble(fullText, agentId);
   setAgentStatus(agentId, "IDLE");
   updateCtxBar(agentId);
   if (t) { t.input.disabled = false; t.form.querySelector("button").disabled = false; t.input.focus(); }
@@ -410,12 +410,26 @@ function handleSSE(agentId, event, data, assistantDiv) {
   }
 }
 
-function showBubble(text) {
-  const short = text.length > 50 ? text.slice(0, 47) + "..." : text;
+let bubbleAgent = null;
+
+function showBubble(text, agentId) {
+  const short = text.length > 30 ? text.slice(0, 27) + "..." : text;
   bubble.textContent = short;
   bubble.classList.remove("hidden");
+  bubbleAgent = agentId || null;
+  positionBubble();
   clearTimeout(bubbleTimer);
-  bubbleTimer = setTimeout(() => bubble.classList.add("hidden"), 4000);
+  bubbleTimer = setTimeout(() => { bubble.classList.add("hidden"); bubbleAgent = null; }, 4000);
+}
+
+function positionBubble() {
+  if (!bubbleAgent || bubble.classList.contains("hidden")) return;
+  const el = getSlotElements(bubbleAgent);
+  if (!el) return;
+  const slotRect = el.slot.getBoundingClientRect();
+  const bw = bubble.offsetWidth;
+  bubble.style.left = (slotRect.left + slotRect.width / 2 - bw / 2) + "px";
+  bubble.style.top = (slotRect.top - bubble.offsetHeight - 4) + "px";
 }
 
 // ======== Context window bar ========
@@ -486,7 +500,7 @@ clearBtn.addEventListener("click", () => {
   groupDisplayMessages.length = 0;
   try { localStorage.removeItem(GROUP_STORAGE_KEY); } catch (_) {}
   Object.keys(AGENTS).forEach(id => setAgentGif(id, "idel"));
-  showBubble("SYS RESET OK");
+  showBubble("SYS RESET OK", selectedAgent);
   Object.keys(AGENTS).forEach(id => ensureSession(id));
 });
 
@@ -601,6 +615,14 @@ function checkCollisions() {
         a.y += ny * push;
         b.x -= nx * push;
         b.y -= ny * push;
+        const container = document.getElementById("agents-row");
+        if (container) {
+          const rect = container.getBoundingClientRect();
+          [a, b].forEach(s => {
+            s.x = Math.max(0, Math.min(s.x, rect.width - PET_W));
+            s.y = Math.max(0, Math.min(s.y, rect.height - PET_H));
+          });
+        }
         applyPosition(ids[i]);
         applyPosition(ids[j]);
         pickNewTarget(ids[i]);
@@ -638,14 +660,7 @@ function roamTick() {
     const ny = s.y + vy;
 
     if (hitsBuilding(nx, ny)) {
-      s.paused = true;
-      setAgentGif(id, "idel");
-      const el = getSlotElements(id);
-      if (el) el.slot.classList.remove("walking");
-      setTimeout(() => {
-        s.paused = false;
-        pickNewTarget(id);
-      }, 500 + Math.random() * 1000);
+      pickNewTarget(id);
       return;
     }
 
@@ -664,6 +679,7 @@ function roamTick() {
     }
   });
   checkCollisions();
+  positionBubble();
   requestAnimationFrame(roamTick);
 }
 
@@ -683,7 +699,7 @@ document.querySelectorAll(".agent-slot").forEach(slot => {
 // ======== Init ========
 
 openChatTab("group");
-showBubble("CLICK A BANGBOO!");
+showBubble("CLICK A BANGBOO!", "eous");
 
 // Restore group chat from localStorage
 loadGroupState();
