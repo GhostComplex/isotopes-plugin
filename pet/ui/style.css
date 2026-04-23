@@ -281,18 +281,18 @@ body {
 }
 
 .pet-shadow {
-  width: 80px;
+  width: 100px;
   height: 8px;
-  background: rgba(77,255,124,0.1);
+  background: rgba(77,255,124,0.08);
   margin-top: 4px;
-  border: 1px solid rgba(77,255,124,0.15);
+  border: 1px solid rgba(77,255,124,0.1);
 }
 
-/* ======== PIXEL BANGBOO ======== */
+/* ======== BANGBOO (accurate to ZZZ design) ======== */
 
 #pet {
-  width: 140px;
-  height: 190px;
+  width: 160px;
+  height: 220px;
   cursor: pointer;
   user-select: none;
   position: relative;
@@ -304,131 +304,230 @@ body {
 
 .bangboo { position: relative; width: 100%; height: 100%; }
 
-/* Ears */
-.p-ear {
+/* ---- White rabbit ears ---- */
+.bb-ear {
   position: absolute;
   top: 0;
-  width: 20px;
-  height: 52px;
-  background: var(--cream);
-  border: 2px solid var(--bg);
-  image-rendering: pixelated;
+  width: 16px;
+  height: 48px;
+  background: #e8e0d0;
+  border: 2px solid #1a1a1a;
+  z-index: 5;
 }
-.p-ear-l { left: 24px; }
-.p-ear-r { right: 24px; }
-.p-ear-inner {
-  width: 10px;
-  height: 30px;
-  background: var(--orange);
-  margin: 6px auto 0;
-}
-
-/* Head */
-.p-head {
+.bb-ear-l { left: 40px; transform: rotate(-6deg); }
+.bb-ear-r { right: 40px; transform: rotate(6deg); }
+/* Ear inner pink/warm tint */
+.bb-ear::after {
+  content: '';
   position: absolute;
-  top: 36px;
+  top: 8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 96px;
-  height: 88px;
-  background: var(--cream);
-  border: 2px solid var(--bg);
-  border-radius: 50%;
-  z-index: 2;
+  width: 8px;
+  height: 24px;
+  background: #d8c8b8;
 }
 
-/* Face screen */
-.p-screen {
+/* ---- Main shell (dark charcoal body, head+torso fused) ---- */
+.bb-shell {
   position: absolute;
-  top: 22px;
+  top: 30px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
-  height: 36px;
-  background: var(--bg);
-  border: 2px solid var(--green-dim);
+  width: 120px;
+  height: 150px;
+  background: #3a3a42;
+  border: 2px solid #1a1a1a;
+  border-radius: 50px 50px 20px 20px;
+  z-index: 3;
+  overflow: visible;
+  /* Subtle gradient for 3D feel */
+  background: linear-gradient(160deg, #4a4a52 0%, #3a3a42 30%, #2e2e36 100%);
+}
+
+/* ---- Face screen (large, takes up most of upper shell) ---- */
+.bb-face {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 56px;
+  background: #0a0a10;
+  border: 2px solid #222;
+  border-radius: 28px;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 4px;
-  box-shadow: inset 0 0 10px rgba(77,255,124,0.1), 0 0 8px rgba(77,255,124,0.15);
+  gap: 16px;
+  box-shadow:
+    inset 0 0 20px rgba(77,255,124,0.08),
+    0 0 12px rgba(77,255,124,0.1);
+  z-index: 4;
 }
 
-/* Eyes — pixel X shape via box-shadow */
-.p-eye {
-  width: 4px;
-  height: 4px;
+/* ---- Eyes: big round green glowing circles ---- */
+.bb-eye {
+  width: 18px;
+  height: 18px;
   background: var(--green);
+  border-radius: 50%;
   position: relative;
   transition: all 0.3s;
   box-shadow:
-    -4px -4px 0 var(--green),
-     4px -4px 0 var(--green),
-    -4px  4px 0 var(--green),
-     4px  4px 0 var(--green);
+    0 0 8px rgba(77,255,124,0.6),
+    0 0 16px rgba(77,255,124,0.3),
+    inset -2px -2px 0 rgba(0,0,0,0.2);
+}
+/* Pixel highlight in eye */
+.bb-eye::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  width: 4px;
+  height: 4px;
+  background: rgba(255,255,255,0.7);
+}
+/* Pixel pupil */
+.bb-eye::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background: #1a6b35;
+  border-radius: 50%;
 }
 
-.p-mouth {
+/* Mouth (small LED) */
+.bb-mouth {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   width: 8px;
   height: 4px;
   background: var(--green);
-  position: absolute;
-  bottom: 6px;
-  left: 50%;
-  transform: translateX(-50%);
+  box-shadow: 0 0 4px rgba(77,255,124,0.4);
   transition: all 0.3s;
 }
 
-/* Body */
-.p-body {
+/* ---- Orange scarf / bandana ---- */
+.bb-scarf {
   position: absolute;
-  top: 115px;
+  top: 68px;
   left: 50%;
   transform: translateX(-50%);
-  width: 64px;
-  height: 48px;
-  background: var(--cream);
-  border: 2px solid var(--bg);
-  z-index: 1;
-}
-
-.p-belt {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 10px;
+  width: 108px;
+  height: 28px;
   background: var(--orange);
-  border-bottom: 2px solid var(--bg);
+  border-top: 2px solid #1a1a1a;
+  border-bottom: 2px solid #1a1a1a;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Slight angle/wrap feel */
+  clip-path: polygon(0% 10%, 100% 0%, 100% 90%, 0% 100%);
 }
-
-.p-arm {
+.bb-scarf-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  color: #faf6ee;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+}
+/* Scarf tail flapping to the right */
+.bb-scarf-tail {
   position: absolute;
-  top: 10px;
-  width: 16px;
-  height: 30px;
-  background: var(--cream);
-  border: 2px solid var(--bg);
+  right: -20px;
+  top: 2px;
+  width: 28px;
+  height: 20px;
+  background: var(--orange);
+  clip-path: polygon(0% 0%, 100% 20%, 80% 100%, 0% 80%);
+  z-index: 4;
+  border: none;
 }
-.p-arm-l { left: -14px; }
-.p-arm-r { right: -14px; }
+.bb-scarf-tail::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 6px;
+  width: 14px;
+  height: 12px;
+  background: var(--orange-dim);
+  clip-path: polygon(0% 0%, 100% 30%, 70% 100%, 0% 70%);
+}
 
-/* Feet */
-.p-feet {
+/* ---- Zipper line down the torso ---- */
+.bb-zipper {
+  position: absolute;
+  top: 98px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 36px;
+  background: #555;
+  z-index: 4;
+}
+.bb-zipper::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -3px;
+  width: 8px;
+  height: 8px;
+  background: #666;
+  border: 1px solid #444;
+}
+
+/* ---- Arms (short, dark, stubby) ---- */
+.bb-arm {
+  position: absolute;
+  top: 90px;
+  width: 18px;
+  height: 36px;
+  background: #3a3a42;
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+  z-index: 2;
+}
+.bb-arm-l { left: -12px; transform: rotate(8deg); }
+.bb-arm-r { right: -12px; transform: rotate(-8deg); }
+/* Tiny hand/paw */
+.bb-arm::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 8px;
+  background: #2e2e36;
+  border-radius: 0 0 4px 4px;
+  border: 1px solid #1a1a1a;
+}
+
+/* ---- Feet ---- */
+.bb-feet {
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 12px;
+  gap: 20px;
+  z-index: 2;
 }
-.p-foot {
-  width: 20px;
-  height: 12px;
-  background: var(--bg);
-  border: 2px solid var(--border);
+.bb-foot {
+  width: 22px;
+  height: 14px;
+  background: #2a2a32;
+  border: 2px solid #1a1a1a;
+  border-radius: 0 0 6px 6px;
 }
 
 /* Mood label */
@@ -448,79 +547,46 @@ body {
 
 /* ======== MOOD VARIATIONS ======== */
 
-/* Happy: dot eyes, wide mouth */
-[data-mood="happy"] .p-eye {
-  box-shadow: none;
-  width: 8px; height: 4px;
-  border-radius: 0;
-  background: var(--green);
-}
-[data-mood="happy"] .p-mouth { width: 16px; height: 4px; }
-[data-mood="happy"] .p-screen { box-shadow: inset 0 0 12px rgba(77,255,124,0.2), 0 0 12px rgba(77,255,124,0.2); }
+/* Happy: big round eyes, wide smile, warm glow */
+[data-mood="happy"] .bb-eye { background: #7fff7f; box-shadow: 0 0 10px rgba(127,255,127,0.7), 0 0 20px rgba(127,255,127,0.3); }
+[data-mood="happy"] .bb-mouth { width: 16px; height: 6px; border-radius: 0 0 8px 8px; }
+[data-mood="happy"] .bb-face { box-shadow: inset 0 0 20px rgba(77,255,124,0.15), 0 0 16px rgba(77,255,124,0.15); }
 
-/* Sad: dash eyes, inverted mouth */
-[data-mood="sad"] .p-eye {
-  box-shadow: none;
-  width: 10px; height: 2px;
-}
-[data-mood="sad"] .p-mouth { width: 8px; height: 2px; background: var(--green-dim); }
+/* Sad: half-closed eyes, dim */
+[data-mood="sad"] .bb-eye { height: 8px; border-radius: 8px 8px 2px 2px; opacity: 0.6; box-shadow: 0 0 4px rgba(77,255,124,0.3); }
+[data-mood="sad"] .bb-eye::before { display: none; }
+[data-mood="sad"] .bb-mouth { width: 10px; height: 2px; background: var(--green-dim); box-shadow: none; }
 
-/* Excited: big X eyes, large mouth, glow */
-[data-mood="excited"] .p-eye {
-  background: #ffcc00;
-  box-shadow:
-    -4px -4px 0 #ffcc00,
-     4px -4px 0 #ffcc00,
-    -4px  4px 0 #ffcc00,
-     4px  4px 0 #ffcc00;
-}
-[data-mood="excited"] .p-mouth { width: 16px; height: 8px; background: #ffcc00; }
-[data-mood="excited"] .p-screen { box-shadow: inset 0 0 12px rgba(255,204,0,0.2), 0 0 15px rgba(255,204,0,0.2); }
+/* Excited: huge glowing eyes, yellow tint */
+[data-mood="excited"] .bb-eye { width: 22px; height: 22px; background: #ccff00; box-shadow: 0 0 12px rgba(204,255,0,0.7), 0 0 24px rgba(204,255,0,0.3); }
+[data-mood="excited"] .bb-eye::before { background: #667a00; }
+[data-mood="excited"] .bb-mouth { width: 14px; height: 8px; border-radius: 0 0 8px 8px; background: #ccff00; box-shadow: 0 0 6px rgba(204,255,0,0.4); }
+[data-mood="excited"] .bb-face { box-shadow: inset 0 0 20px rgba(204,255,0,0.1), 0 0 18px rgba(204,255,0,0.15); }
 
-/* Sleepy: thin line eyes */
-[data-mood="sleepy"] .p-eye {
-  box-shadow: none;
-  width: 12px; height: 2px;
-}
-[data-mood="sleepy"] .p-mouth { width: 6px; height: 6px; }
-[data-mood="sleepy"] .p-screen { box-shadow: inset 0 0 8px rgba(77,255,124,0.05); }
+/* Sleepy: barely-open slit eyes */
+[data-mood="sleepy"] .bb-eye { height: 4px; width: 16px; border-radius: 2px; box-shadow: 0 0 4px rgba(77,255,124,0.2); }
+[data-mood="sleepy"] .bb-eye::before { display: none; }
+[data-mood="sleepy"] .bb-eye::after { display: none; }
+[data-mood="sleepy"] .bb-mouth { width: 6px; height: 6px; border-radius: 50%; }
+[data-mood="sleepy"] .bb-face { box-shadow: inset 0 0 10px rgba(77,255,124,0.03); }
 
-/* Angry: red eyes */
-[data-mood="angry"] .p-eye {
-  background: #ff4444;
-  box-shadow:
-    -4px -4px 0 #ff4444,
-     4px -4px 0 #ff4444,
-    -4px  4px 0 #ff4444,
-     4px  4px 0 #ff4444;
-}
-[data-mood="angry"] .p-mouth { width: 12px; height: 2px; background: #ff4444; }
-[data-mood="angry"] .p-screen { box-shadow: inset 0 0 12px rgba(255,68,68,0.2), 0 0 10px rgba(255,68,68,0.15); }
+/* Angry: red glowing eyes */
+[data-mood="angry"] .bb-eye { background: #ff3333; box-shadow: 0 0 10px rgba(255,51,51,0.7), 0 0 20px rgba(255,51,51,0.3); }
+[data-mood="angry"] .bb-eye::before { background: #990000; }
+[data-mood="angry"] .bb-eye::after { background: rgba(255,200,200,0.7); }
+[data-mood="angry"] .bb-mouth { width: 14px; height: 3px; background: #ff3333; box-shadow: 0 0 4px rgba(255,51,51,0.5); }
+[data-mood="angry"] .bb-face { box-shadow: inset 0 0 20px rgba(255,51,51,0.1), 0 0 12px rgba(255,51,51,0.15); }
 
-/* Love: heart-ish pixel eyes */
-[data-mood="love"] .p-eye {
-  background: #ff6a8a;
-  box-shadow:
-    -4px 0 0 #ff6a8a,
-     4px 0 0 #ff6a8a,
-    -4px -4px 0 #ff6a8a,
-     4px -4px 0 #ff6a8a,
-     0 4px 0 #ff6a8a;
-}
-[data-mood="love"] .p-mouth { width: 10px; height: 4px; background: #ff6a8a; }
+/* Love: pink glowing eyes with hearts */
+[data-mood="love"] .bb-eye { background: #ff6a8a; box-shadow: 0 0 10px rgba(255,106,138,0.7), 0 0 20px rgba(255,106,138,0.3); }
+[data-mood="love"] .bb-eye::before { background: #a0304a; }
+[data-mood="love"] .bb-eye::after { background: rgba(255,220,230,0.7); }
+[data-mood="love"] .bb-mouth { width: 10px; height: 6px; border-radius: 0 0 6px 6px; background: #ff6a8a; box-shadow: 0 0 4px rgba(255,106,138,0.4); }
 
-/* Confused: asymmetric */
-[data-mood="confused"] .p-eye-l {
-  box-shadow:
-    -4px -4px 0 var(--green),
-     4px  4px 0 var(--green);
-}
-[data-mood="confused"] .p-eye-r {
-  box-shadow:
-     4px -4px 0 var(--green),
-    -4px  4px 0 var(--green);
-}
-[data-mood="confused"] .p-mouth { width: 6px; height: 6px; }
+/* Confused: uneven eyes, one bigger */
+[data-mood="confused"] .bb-eye-l { width: 20px; height: 20px; }
+[data-mood="confused"] .bb-eye-r { width: 12px; height: 12px; }
+[data-mood="confused"] .bb-mouth { width: 8px; height: 8px; border-radius: 50%; background: var(--green-dim); }
 
 /* ======== RIGHT PANEL: CHAT ======== */
 
@@ -720,9 +786,28 @@ body {
 .anim-nod { animation: nod 0.4s steps(4) 2 !important; }
 .anim-poke { animation: poke 0.25s steps(4) !important; }
 
-.mood-change .p-screen {
+.mood-change .bb-face {
   animation: glitch 0.3s steps(4);
 }
+
+/* Ear idle wiggle */
+@keyframes ear-wiggle-l {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(-12deg); }
+}
+@keyframes ear-wiggle-r {
+  0%, 100% { transform: rotate(6deg); }
+  50% { transform: rotate(12deg); }
+}
+#pet:not([class*="anim-"]) .bb-ear-l { animation: ear-wiggle-l 3s steps(4) infinite; }
+#pet:not([class*="anim-"]) .bb-ear-r { animation: ear-wiggle-r 3s steps(4) infinite 0.4s; }
+
+/* Eye glow pulse */
+@keyframes eye-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(77,255,124,0.6), 0 0 16px rgba(77,255,124,0.3); }
+  50% { box-shadow: 0 0 12px rgba(77,255,124,0.8), 0 0 24px rgba(77,255,124,0.4); }
+}
+#pet:not([class*="anim-"]) .bb-eye { animation: eye-pulse 2s steps(4) infinite; }
 
 /* ======== RESPONSIVE ======== */
 
