@@ -446,8 +446,37 @@ chatToggle.classList.add("active");
 
 const roamState = {};
 const ROAM_SPEED = 0.6; // px per frame
-const PET_W = 160;
-const PET_H = 200;
+const PET_W = 220;
+const PET_H = 260;
+
+let buildingBoxes = [];
+
+function updateBuildingBoxes() {
+  const container = document.getElementById("agents-row");
+  if (!container) return;
+  const cr = container.getBoundingClientRect();
+  buildingBoxes = [];
+  document.querySelectorAll(".px-bldg").forEach(bldg => {
+    const br = bldg.getBoundingClientRect();
+    buildingBoxes.push({
+      x: br.left - cr.left,
+      y: br.top - cr.top,
+      w: br.width,
+      h: br.height,
+    });
+  });
+}
+
+function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+  return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+}
+
+function hitsBuilding(px, py) {
+  for (const b of buildingBoxes) {
+    if (rectsOverlap(px, py, PET_W, PET_H, b.x, b.y, b.w, b.h)) return true;
+  }
+  return false;
+}
 
 Object.keys(AGENTS).forEach(id => {
   roamState[id] = { x: 0, y: 0, targetX: 0, targetY: 0, paused: false, hovered: false, initialized: false };
@@ -479,6 +508,15 @@ function pickNewTarget(agentId) {
   const rect = container.getBoundingClientRect();
   const margin = 20;
   const s = roamState[agentId];
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const tx = margin + Math.random() * (rect.width - PET_W - margin * 2);
+    const ty = margin + Math.random() * (rect.height - PET_H - margin * 2);
+    if (!hitsBuilding(tx, ty)) {
+      s.targetX = tx;
+      s.targetY = ty;
+      return;
+    }
+  }
   s.targetX = margin + Math.random() * (rect.width - PET_W - margin * 2);
   s.targetY = margin + Math.random() * (rect.height - PET_H - margin * 2);
 }
@@ -542,8 +580,23 @@ function roamTick() {
 
     const vx = (dx / dist) * ROAM_SPEED;
     const vy = (dy / dist) * ROAM_SPEED;
-    s.x += vx;
-    s.y += vy;
+    const nx = s.x + vx;
+    const ny = s.y + vy;
+
+    if (hitsBuilding(nx, ny)) {
+      s.paused = true;
+      setAgentGif(id, "idel");
+      const el = getSlotElements(id);
+      if (el) el.slot.classList.remove("walking");
+      setTimeout(() => {
+        s.paused = false;
+        pickNewTarget(id);
+      }, 500 + Math.random() * 1000);
+      return;
+    }
+
+    s.x = nx;
+    s.y = ny;
     applyPosition(id);
 
     // Flip based on direction
@@ -585,12 +638,14 @@ loadGroupState();
 Object.keys(AGENTS).forEach(id => ensureSession(id));
 
 initRoamPositions();
+updateBuildingBoxes();
 Object.keys(AGENTS).forEach(id => {
   setTimeout(() => pickNewTarget(id), 1000 + Math.random() * 2000);
 });
 requestAnimationFrame(roamTick);
 
 window.addEventListener("resize", () => {
+  updateBuildingBoxes();
   const container = document.getElementById("agents-row");
   if (!container) return;
   const rect = container.getBoundingClientRect();

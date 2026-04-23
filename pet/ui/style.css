@@ -280,17 +280,725 @@ body {
   padding: 0;
   position: relative;
   overflow: hidden;
+  background: #2a2a2e;
 }
 
 .pixel-grid-bg {
+  display: none;
+}
+
+/* ======== New Eridu Top-Down Map — Detailed Pixel Art ======== */
+
+.street-scene {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 32px 32px;
-  opacity: 0.15;
   pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  background: #2a2a2e;
+}
+
+/* Ground tile texture */
+.map-ground {
+  display: none;
+}
+
+/* ---- DETAILED BUILDING BASE ---- */
+.px-bldg {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* ==== RAMEN SHOP (top-left) ==== */
+.bldg-ramen {
+  width: 90px;
+  height: 80px;
+}
+/* Main wall */
+.bldg-ramen .wall {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 90px; height: 56px;
+  background: #6b4a3a;
+  border: 2px solid #4a3228;
+}
+/* Wall brick texture */
+.bldg-ramen .wall::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0px, transparent 6px, rgba(0,0,0,0.08) 6px, rgba(0,0,0,0.08) 7px),
+    repeating-linear-gradient(90deg, transparent 0px, transparent 10px, rgba(0,0,0,0.06) 10px, rgba(0,0,0,0.06) 11px);
+}
+/* Awning */
+.bldg-ramen .awning {
+  position: absolute;
+  bottom: 20px; left: -2px;
+  width: 94px; height: 10px;
+  background: repeating-linear-gradient(90deg, #c84030 0px, #c84030 6px, #e85848 6px, #e85848 12px);
+  border: 1px solid #a03028;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+}
+/* Sign board */
+.bldg-ramen .sign {
+  position: absolute;
+  bottom: 32px; left: 8px;
+  width: 50px; height: 16px;
+  background: #e8d0a0;
+  border: 2px solid #a08060;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  color: #c84030;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+}
+/* Windows */
+.bldg-ramen .win {
+  position: absolute;
+  width: 12px; height: 14px;
+  background: #2a4038;
+  border: 2px solid #4a3228;
+  box-shadow: inset 0 0 3px rgba(255,200,100,0.15);
+}
+.bldg-ramen .win::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 50%;
+  width: 1px; height: 100%;
+  background: #4a3228;
+}
+/* Door */
+.bldg-ramen .door {
+  position: absolute;
+  bottom: 2px; left: 50%;
+  transform: translateX(-50%);
+  width: 14px; height: 18px;
+  background: #3a2a20;
+  border: 2px solid #4a3228;
+  box-shadow: inset 0 0 4px rgba(255,180,80,0.2);
+}
+.bldg-ramen .door::after {
+  content: "";
+  position: absolute;
+  top: 6px; right: 2px;
+  width: 2px; height: 2px;
+  background: #c8a060;
+  border-radius: 50%;
+}
+/* Rooftop — AC unit */
+.bldg-ramen .rooftop {
+  position: absolute;
+  top: 0; left: 10px;
+  width: 30px; height: 18px;
+  background: #888078;
+  border: 2px solid #686058;
+}
+.bldg-ramen .rooftop::before {
+  content: "";
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 8px; height: 10px;
+  background: repeating-linear-gradient(0deg, #686058 0px, #686058 2px, #787068 2px, #787068 4px);
+  border: 1px solid #585048;
+}
+.bldg-ramen .rooftop::after {
+  content: "";
+  position: absolute;
+  top: 2px; right: 3px;
+  width: 10px; height: 6px;
+  background: #585048;
+  border: 1px solid #484038;
+}
+/* Pipe */
+.bldg-ramen .pipe {
+  position: absolute;
+  top: 16px; left: 8px;
+  width: 3px; height: 14px;
+  background: #686058;
+  border: 1px solid #585048;
+}
+.bldg-ramen .pipe::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: -2px;
+  width: 7px; height: 3px;
+  background: #686058;
+  border: 1px solid #585048;
+}
+/* Lanterns */
+.bldg-ramen .lantern {
+  position: absolute;
+  width: 6px; height: 8px;
+  background: radial-gradient(circle, #ff6040 30%, #cc3020 100%);
+  border-radius: 1px;
+  box-shadow: 0 0 4px rgba(255,96,64,0.4);
+  animation: lantern-sway 3s ease-in-out infinite;
+}
+@keyframes lantern-sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+/* ==== COFFEE SHOP (top-right) ==== */
+.bldg-coffee {
+  width: 80px;
+  height: 85px;
+}
+.bldg-coffee .wall {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 80px; height: 52px;
+  background: #485868;
+  border: 2px solid #384858;
+}
+/* Teal lower trim */
+.bldg-coffee .wall::before {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 14px;
+  background: #3a6858;
+  border-top: 2px solid #2a5848;
+}
+/* Glass panels */
+.bldg-coffee .glass {
+  position: absolute;
+  width: 16px; height: 22px;
+  background: linear-gradient(180deg, #506858 0%, #3a5848 100%);
+  border: 2px solid #2a4838;
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.05);
+}
+.bldg-coffee .glass::after {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 4px; height: 8px;
+  background: rgba(255,255,255,0.06);
+}
+/* Coffee sign */
+.bldg-coffee .sign {
+  position: absolute;
+  bottom: 14px; left: 50%;
+  transform: translateX(-50%);
+  width: 46px; height: 10px;
+  background: #2a2a2e;
+  border: 1px solid #585048;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px;
+  color: #e8d0a0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 1px;
+}
+/* Upper section — billboard */
+.bldg-coffee .billboard {
+  position: absolute;
+  top: 8px; left: 4px;
+  width: 72px; height: 24px;
+  background: #a08050;
+  border: 2px solid #806838;
+}
+.bldg-coffee .billboard::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background: #c8a060;
+  border: 1px solid #a08050;
+}
+/* Rooftop equipment */
+.bldg-coffee .rooftop {
+  position: absolute;
+  top: 0; left: 15px;
+  width: 50px; height: 12px;
+  background: #686868;
+  border: 2px solid #505050;
+}
+.bldg-coffee .rooftop::before {
+  content: "";
+  position: absolute;
+  top: 2px; left: 4px;
+  width: 14px; height: 6px;
+  background: repeating-linear-gradient(90deg, #585858 0px, #585858 2px, #484848 2px, #484848 4px);
+  border: 1px solid #404040;
+}
+.bldg-coffee .rooftop::after {
+  content: "";
+  position: absolute;
+  top: -4px; right: 8px;
+  width: 4px; height: 6px;
+  background: #c04030;
+  border: 1px solid #a03020;
+}
+/* Pipe */
+.bldg-coffee .pipe {
+  position: absolute;
+  top: 10px; right: 4px;
+  width: 3px; height: 22px;
+  background: #607060;
+  border-right: 1px solid #506050;
+}
+/* 24h sign */
+.bldg-coffee .badge {
+  position: absolute;
+  top: 12px; left: 2px;
+  width: 16px; height: 18px;
+  background: #d86878;
+  border: 2px solid #b85060;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+}
+
+/* ==== CHINESE RESTAURANT (bottom-right) ==== */
+.bldg-chinese {
+  width: 100px;
+  height: 90px;
+}
+.bldg-chinese .wall {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100px; height: 50px;
+  background: #685840;
+  border: 2px solid #504030;
+}
+/* Peeling wall texture */
+.bldg-chinese .wall::before {
+  content: "";
+  position: absolute;
+  top: 4px; left: 4px;
+  width: 30px; height: 20px;
+  background: #608078;
+  border: 1px solid #507068;
+  opacity: 0.5;
+}
+/* Counter bar */
+.bldg-chinese .counter {
+  position: absolute;
+  bottom: 2px; left: 20px;
+  width: 60px; height: 8px;
+  background: #a08050;
+  border: 2px solid #806838;
+}
+.bldg-chinese .counter::before {
+  content: "";
+  position: absolute;
+  top: -2px; left: 8px;
+  width: 6px; height: 4px;
+  background: #c8a060;
+  border-radius: 2px 2px 0 0;
+  box-shadow: 12px 0 0 #c8a060, 24px 0 0 #c8a060, 36px 0 0 #c8a060;
+}
+/* Stools */
+.bldg-chinese .stool {
+  position: absolute;
+  bottom: -4px;
+  width: 6px; height: 6px;
+  background: #a08060;
+  border-radius: 50%;
+  border: 1px solid #806040;
+}
+/* Main sign */
+.bldg-chinese .sign {
+  position: absolute;
+  top: 14px; left: 24px;
+  width: 52px; height: 22px;
+  background: #e8d8c0;
+  border: 2px solid #a09070;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: #c84030;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+}
+/* Upper structure */
+.bldg-chinese .upper {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100px; height: 18px;
+  background: #806848;
+  border: 2px solid #685838;
+}
+.bldg-chinese .upper::before {
+  content: "";
+  position: absolute;
+  top: 2px; left: 4px;
+  width: 40px; height: 10px;
+  background: #585048;
+  border: 1px solid #484038;
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0px, transparent 8px, rgba(0,0,0,0.1) 8px, rgba(0,0,0,0.1) 10px);
+}
+/* Poster */
+.bldg-chinese .poster {
+  position: absolute;
+  top: 16px; right: 8px;
+  width: 18px; height: 22px;
+  background: #4080a0;
+  border: 2px solid #306880;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.2);
+}
+/* Lantern string */
+.bldg-chinese .lantern-string {
+  position: absolute;
+  top: 38px; left: 22px;
+  width: 56px; height: 1px;
+  background: #504030;
+}
+.bldg-chinese .lantern-string::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 6px;
+  width: 5px; height: 5px;
+  background: radial-gradient(circle, #ff8840 30%, #cc6020 100%);
+  border-radius: 50%;
+  box-shadow:
+    10px 1px 0 0 #ff8840,
+    20px -1px 0 0 #ff8840,
+    30px 1px 0 0 #ff8840,
+    40px 0 0 0 #ff8840;
+  animation: lantern-sway 4s ease-in-out infinite;
+}
+
+/* ==== TECH/PARTS SHOP (bottom-left) ==== */
+.bldg-tech {
+  width: 80px;
+  height: 75px;
+}
+.bldg-tech .wall {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 80px; height: 50px;
+  background: #485060;
+  border: 2px solid #384050;
+}
+/* Brick section */
+.bldg-tech .wall::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 24px; height: 100%;
+  background:
+    repeating-linear-gradient(0deg, #685040 0px, #685040 5px, #785848 5px, #785848 6px),
+    repeating-linear-gradient(90deg, transparent 0px, transparent 10px, rgba(0,0,0,0.08) 10px, rgba(0,0,0,0.08) 11px);
+  border-right: 2px solid #384050;
+}
+/* Screen/monitor */
+.bldg-tech .screen {
+  position: absolute;
+  width: 14px; height: 12px;
+  background: #3080a0;
+  border: 2px solid #384050;
+  box-shadow: 0 0 4px rgba(48,128,160,0.3);
+  animation: screen-flicker 6s ease-in-out infinite;
+}
+.bldg-tech .screen::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(255,255,255,0.04) 2px, rgba(255,255,255,0.04) 3px);
+}
+@keyframes screen-flicker {
+  0%, 90%, 100% { opacity: 1; }
+  92% { opacity: 0.6; }
+  94% { opacity: 1; }
+}
+/* Sign */
+.bldg-tech .sign {
+  position: absolute;
+  top: 4px; left: 30px;
+  width: 40px; height: 12px;
+  background: #2a3040;
+  border: 1px solid #4a5060;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 4px;
+  color: #4dff7c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 0 3px rgba(77,255,124,0.5);
+}
+/* Rooftop vent */
+.bldg-tech .rooftop {
+  position: absolute;
+  top: 0; left: 20px;
+  width: 40px; height: 14px;
+  background: #606060;
+  border: 2px solid #484848;
+}
+.bldg-tech .rooftop::before {
+  content: "";
+  position: absolute;
+  top: 3px; left: 4px;
+  width: 10px; height: 6px;
+  border-radius: 50%;
+  background: #505050;
+  border: 1px solid #404040;
+  box-shadow: 14px 0 0 #505050;
+}
+/* Cables */
+.bldg-tech .cable {
+  position: absolute;
+  width: 2px;
+  background: #504840;
+}
+
+/* ==== SMALL STALL (accent piece) ==== */
+.bldg-stall {
+  width: 40px;
+  height: 35px;
+}
+.bldg-stall .wall {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 40px; height: 28px;
+  background: #7a5040;
+  border: 2px solid #604030;
+}
+.bldg-stall .awning {
+  position: absolute;
+  top: 0; left: -2px;
+  width: 44px; height: 8px;
+  background: repeating-linear-gradient(90deg, #e8c840 0px, #e8c840 5px, #d0b030 5px, #d0b030 10px);
+  border: 1px solid #b09820;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+}
+.bldg-stall .sign {
+  position: absolute;
+  bottom: 10px; left: 4px;
+  width: 32px; height: 8px;
+  background: #504030;
+  border: 1px solid #685040;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 4px;
+  color: #e8d0a0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==== ARCADE — large complex building ==== */
+.bldg-arcade {
+  width: 110px;
+  height: 95px;
+}
+.bldg-arcade .arcade-wall {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 110px; height: 58px;
+  background: #3a3050;
+  border: 2px solid #2a2040;
+}
+/* Brick/panel texture */
+.bldg-arcade .arcade-wall::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0px, transparent 8px, rgba(255,255,255,0.03) 8px, rgba(255,255,255,0.03) 9px),
+    repeating-linear-gradient(90deg, transparent 0px, transparent 12px, rgba(255,255,255,0.02) 12px, rgba(255,255,255,0.02) 13px);
+}
+/* Colored trim at bottom */
+.bldg-arcade .arcade-wall::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #c040a0, #6040c0, #4080c0);
+  opacity: 0.6;
+}
+/* Upper structure */
+.bldg-arcade .arcade-upper {
+  position: absolute;
+  top: 0; left: 8px;
+  width: 94px; height: 28px;
+  background: #484058;
+  border: 2px solid #383048;
+}
+.bldg-arcade .arcade-upper::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background:
+    repeating-linear-gradient(90deg, #3a3248 0px, #3a3248 8px, #322a40 8px, #322a40 10px);
+}
+/* Main sign */
+.bldg-arcade .arcade-sign {
+  position: absolute;
+  top: 30px; left: 50%;
+  transform: translateX(-50%);
+  width: 60px; height: 14px;
+  background: #1a1028;
+  border: 2px solid #c040a0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  color: #ff60c0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 0 6px rgba(255,96,192,0.6);
+  box-shadow: 0 0 8px rgba(192,64,160,0.3), inset 0 0 6px rgba(192,64,160,0.1);
+  animation: neon-pulse 2.5s ease-in-out infinite;
+}
+/* Japanese sub-sign */
+.bldg-arcade .arcade-subsign {
+  position: absolute;
+  top: 46px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 4px;
+  color: #80c0ff;
+  text-shadow: 0 0 4px rgba(128,192,255,0.5);
+  letter-spacing: 1px;
+}
+/* Marquee stripe */
+.bldg-arcade .arcade-marquee {
+  position: absolute;
+  bottom: 34px; left: 2px; right: 2px;
+  height: 4px;
+  background: repeating-linear-gradient(90deg,
+    #ff4080 0px, #ff4080 4px,
+    #ffc040 4px, #ffc040 8px,
+    #40c0ff 8px, #40c0ff 12px,
+    #80ff40 12px, #80ff40 16px
+  );
+  animation: marquee-scroll 3s linear infinite;
+}
+@keyframes marquee-scroll {
+  0% { background-position: 0 0; }
+  100% { background-position: 16px 0; }
+}
+/* Arcade cabinet screens */
+.bldg-arcade .arcade-screen {
+  position: absolute;
+  width: 16px; height: 14px;
+  background: #103040;
+  border: 2px solid #2a2040;
+  box-shadow: 0 0 6px rgba(48,128,160,0.3);
+  animation: screen-flicker 5s ease-in-out infinite;
+}
+.bldg-arcade .arcade-screen::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,255,200,0.06) 2px, rgba(0,255,200,0.06) 3px);
+}
+.bldg-arcade .arcade-screen::after {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 4px; height: 3px;
+  background: rgba(0,255,200,0.15);
+}
+/* Door */
+.bldg-arcade .arcade-door {
+  position: absolute;
+  bottom: 2px; left: 50%;
+  transform: translateX(-50%);
+  width: 16px; height: 20px;
+  background: #1a1028;
+  border: 2px solid #2a2040;
+  box-shadow: inset 0 0 6px rgba(192,64,160,0.15);
+}
+.bldg-arcade .arcade-door::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 2px; height: 8px;
+  background: rgba(192,64,160,0.4);
+}
+.bldg-arcade .arcade-door::after {
+  content: "";
+  position: absolute;
+  top: 6px; right: 2px;
+  width: 2px; height: 2px;
+  background: #c040a0;
+  border-radius: 50%;
+  box-shadow: 0 0 3px rgba(192,64,160,0.5);
+}
+/* Rooftop AC units */
+.bldg-arcade .arcade-ac {
+  position: absolute;
+  top: 4px; left: 12px;
+  width: 20px; height: 12px;
+  background: #686060;
+  border: 2px solid #504848;
+}
+.bldg-arcade .arcade-ac::before {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #585050;
+  border: 1px solid #484040;
+  box-shadow: 8px 0 0 #585050;
+}
+/* Pipe */
+.bldg-arcade .arcade-pipe {
+  position: absolute;
+  top: 14px; left: 6px;
+  width: 3px; height: 18px;
+  background: #605858;
+  border: 1px solid #504848;
+}
+.bldg-arcade .arcade-pipe::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: -3px;
+  width: 9px; height: 3px;
+  background: #605858;
+}
+/* Vent */
+.bldg-arcade .arcade-vent {
+  position: absolute;
+  top: 6px; right: 8px;
+  width: 14px; height: 8px;
+  background: repeating-linear-gradient(0deg, #585050 0px, #585050 2px, #484040 2px, #484040 4px);
+  border: 1px solid #484040;
+}
+/* Neon accent line */
+.bldg-arcade .arcade-neon {
+  position: absolute;
+  bottom: 56px; left: 4px; right: 4px;
+  height: 2px;
+  background: linear-gradient(90deg, #c040a0, #6040c0, #4080c0);
+  box-shadow: 0 0 6px rgba(192,64,160,0.4);
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+/* Posters */
+.bldg-arcade .arcade-poster {
+  position: absolute;
+  width: 12px; height: 16px;
+  background: #604020;
+  border: 1px solid #503018;
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.3);
+}
+.bldg-arcade .arcade-poster::before {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px; right: 2px;
+  height: 6px;
+  background: rgba(255,200,100,0.15);
+}
+
+@keyframes neon-pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+  72% { opacity: 0.7; }
+  74% { opacity: 0.95; }
 }
 
 #pet-platform {
@@ -339,8 +1047,8 @@ body {
 }
 
 .agent-pet {
-  width: 160px;
-  height: 160px;
+  width: 220px;
+  height: 220px;
   position: relative;
 }
 
@@ -368,8 +1076,8 @@ body {
 }
 
 .agent-shadow {
-  width: 80px;
-  height: 6px;
+  width: 110px;
+  height: 8px;
   background: rgba(77,255,124,0.06);
   border: 1px solid rgba(77,255,124,0.08);
   margin-top: 4px;
