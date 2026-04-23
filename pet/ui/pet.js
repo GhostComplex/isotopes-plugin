@@ -130,14 +130,35 @@ function playAction(agentId, action) {
 async function ensureSession(agentId) {
   const agent = AGENTS[agentId];
   if (agent.session) return agent.session;
+  const sessionKey = `pet:${agentId}`;
   const res = await fetch(`${API}/api/chat/sessions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ agentId }),
+    body: JSON.stringify({ agentId, sessionKey }),
   });
   const data = await res.json();
   agent.session = data.sessionId;
+  if (data.resumed) await loadHistory(agentId);
   return agent.session;
+}
+
+async function loadHistory(agentId) {
+  const agent = AGENTS[agentId];
+  if (!agent.session) return;
+  try {
+    const res = await fetch(`${API}/api/chat/sessions/${agent.session}/messages`);
+    const data = await res.json();
+    if (!data.messages?.length) return;
+    const t = agentTabs[agentId];
+    if (t) t.messages.innerHTML = "";
+    for (const msg of data.messages) {
+      if (msg.role === "user") {
+        addMessage("user", msg.content, agentId);
+      } else if (msg.role === "assistant" && msg.content) {
+        addMessage("assistant", msg.content, agentId);
+      }
+    }
+  } catch (_) {}
 }
 
 function addMessage(role, text, agentId) {
@@ -246,10 +267,15 @@ document.querySelectorAll(".agent-slot").forEach(slot => {
 });
 
 clearBtn.addEventListener("click", () => {
-  Object.values(AGENTS).forEach(a => a.session = null);
+  Object.entries(AGENTS).forEach(([id, a]) => {
+    if (a.session) fetch(`${API}/api/chat/sessions/${a.session}`, { method: "DELETE" }).catch(() => {});
+    a.session = null;
+  });
   Object.values(agentTabs).forEach(t => t.messages.innerHTML = "");
   Object.keys(AGENTS).forEach(id => setAgentGif(id, "idel"));
   showBubble("SYS RESET OK");
+  // Re-create fresh sessions
+  Object.keys(AGENTS).forEach(id => ensureSession(id));
 });
 
 chatToggle.addEventListener("click", () => {
@@ -307,6 +333,33 @@ function applyPosition(agentId) {
   el.slot.style.top = s.y + "px";
 }
 
+function checkCollisions() {
+  const ids = Object.keys(AGENTS);
+  const collisionDist = 100;
+  for (let i = 0; i < ids.length; i++) {
+    for (let j = i + 1; j < ids.length; j++) {
+      const a = roamState[ids[i]];
+      const b = roamState[ids[j]];
+      const cx = (a.x + PET_W / 2) - (b.x + PET_W / 2);
+      const cy = (a.y + PET_H / 2) - (b.y + PET_H / 2);
+      const dist = Math.sqrt(cx * cx + cy * cy);
+      if (dist < collisionDist && dist > 0) {
+        const push = (collisionDist - dist) / 2 + 5;
+        const nx = cx / dist;
+        const ny = cy / dist;
+        a.x += nx * push;
+        a.y += ny * push;
+        b.x -= nx * push;
+        b.y -= ny * push;
+        applyPosition(ids[i]);
+        applyPosition(ids[j]);
+        pickNewTarget(ids[i]);
+        pickNewTarget(ids[j]);
+      }
+    }
+  }
+}
+
 function roamTick() {
   Object.keys(AGENTS).forEach(id => {
     const s = roamState[id];
@@ -345,6 +398,7 @@ function roamTick() {
       }
     }
   });
+  checkCollisions();
   requestAnimationFrame(roamTick);
 }
 
@@ -365,6 +419,9 @@ document.querySelectorAll(".agent-slot").forEach(slot => {
 
 openChatTab("eous");
 showBubble("CLICK A BANGBOO!");
+
+// Preload sessions to restore chat history
+Object.keys(AGENTS).forEach(id => ensureSession(id));
 
 initRoamPositions();
 Object.keys(AGENTS).forEach(id => {
