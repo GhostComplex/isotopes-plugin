@@ -1,11 +1,7 @@
-// plugins/pet/ui/pet.js — GIF-animated Bangboo pet
+// plugins/pet/ui/pet.js — Multi-agent GIF pet system
 
 const API = window.location.origin;
-const pet = document.getElementById("pet");
-const petGif = document.getElementById("pet-gif");
 const bubble = document.getElementById("speech-bubble");
-const moodText = document.getElementById("mood-text");
-const statMood = document.getElementById("stat-mood");
 const messagesEl = document.getElementById("messages");
 const form = document.getElementById("chat-form");
 const input = document.getElementById("chat-input");
@@ -13,107 +9,122 @@ const clearBtn = document.getElementById("clear-btn");
 const chatToggle = document.getElementById("chat-toggle");
 const contentGrid = document.getElementById("content-grid");
 
-let sessionId = null;
 let bubbleTimer = null;
-let currentMood = "neutral";
-let animating = false;
 
-// ======== GIF sources ========
-const GIFS = {
-  idle:  "/ui/pet/gif/idle.gif",
-  stand: "/ui/pet/gif/stand.gif",
-  look:  "/ui/pet/gif/look.gif",
+// ======== Agent definitions ========
+
+const AGENTS = {
+  eous:     { name: "EOUS",     prefix: "eous",     session: null },
+  amillion: { name: "AMILLION", prefix: "amillion", session: null },
+  penguin:  { name: "PENGUIN",  prefix: "enguin",   session: null },  // file prefix is "enguin"
 };
 
-// ======== CSS animation names for poke reactions ========
-const POKE_REACTIONS = [
-  { gif: "stand", anim: "anim-jump" },
-  { gif: "look",  anim: "anim-shake" },
-  { gif: "idle",  anim: "anim-squish" },
-  { gif: "stand", anim: "anim-bounce" },
-  { gif: "look",  anim: "anim-spin" },
-];
-
-// Action -> CSS animation mapping
-const ACTION_ANIMS = {
-  jump:   "anim-jump",
-  spin:   "anim-spin",
-  shake:  "anim-shake",
-  wave:   "anim-wave",
-  dance:  "anim-dance",
-  bounce: "anim-bounce",
-  nod:    "anim-nod",
-  poke:   null, // handled specially
-  sleep:  null,
-};
-
-// ======== Animation engine ========
-
-function setGif(name) {
-  const src = GIFS[name] || GIFS.idle;
-  // Force reload to restart GIF animation
-  petGif.src = "";
-  petGif.src = src;
+// GIF states per agent: idle, jump, touch
+function gifUrl(agentId, state) {
+  const prefix = AGENTS[agentId].prefix;
+  return `/ui/pet/gif/${prefix}-${state}.gif`;
 }
 
-function playAnim(cssClass, gifName, duration) {
-  if (animating) return;
-  animating = true;
+// Currently selected agent for chat
+let selectedAgent = "eous";
 
-  if (gifName) setGif(gifName);
+// ======== Animation system ========
 
-  // Remove old anim classes
-  pet.className = "";
-  void pet.offsetWidth; // force reflow
-  pet.classList.add(cssClass);
+const POKE_REACTIONS = [
+  { gif: "touch", anim: "anim-squish" },
+  { gif: "jump",  anim: "anim-jump" },
+  { gif: "touch", anim: "anim-shake" },
+  { gif: "jump",  anim: "anim-bounce" },
+  { gif: "touch", anim: "anim-spin" },
+];
+
+const ACTION_ANIMS = {
+  jump:   { gif: "jump",  anim: "anim-jump" },
+  spin:   { gif: "touch", anim: "anim-spin" },
+  shake:  { gif: "touch", anim: "anim-shake" },
+  wave:   { gif: "idel",  anim: "anim-wave" },
+  dance:  { gif: "jump",  anim: "anim-dance" },
+  bounce: { gif: "jump",  anim: "anim-bounce" },
+  nod:    { gif: "idel",  anim: "anim-nod" },
+  sleep:  { gif: "idel",  anim: null },
+  poke:   null,
+};
+
+function getSlotElements(agentId) {
+  const slot = document.querySelector(`.agent-slot[data-agent="${agentId}"]`);
+  if (!slot) return null;
+  return {
+    slot,
+    pet: slot.querySelector(".agent-pet"),
+    gif: slot.querySelector(".agent-gif"),
+  };
+}
+
+function setAgentGif(agentId, state) {
+  const el = getSlotElements(agentId);
+  if (!el) return;
+  el.gif.src = "";
+  el.gif.src = gifUrl(agentId, state);
+}
+
+function playAgentAnim(agentId, cssClass, gifState, duration) {
+  const el = getSlotElements(agentId);
+  if (!el) return;
+
+  if (gifState) setAgentGif(agentId, gifState);
+
+  el.pet.className = "agent-pet";
+  void el.pet.offsetWidth;
+  if (cssClass) el.pet.classList.add(cssClass);
 
   setTimeout(() => {
-    pet.classList.remove(cssClass);
-    setGif("idle");
-    animating = false;
+    el.pet.classList.remove(cssClass);
+    setAgentGif(agentId, "idel");
   }, duration || 1200);
 }
 
-function playAnimation(action) {
+function pokeAgent(agentId) {
+  const pick = POKE_REACTIONS[Math.floor(Math.random() * POKE_REACTIONS.length)];
+  playAgentAnim(agentId, pick.anim, pick.gif, 1000);
+}
+
+function playAction(agentId, action) {
   if (action === "poke") {
-    const pick = POKE_REACTIONS[Math.floor(Math.random() * POKE_REACTIONS.length)];
-    playAnim(pick.anim, pick.gif, 1000);
+    pokeAgent(agentId);
     return;
   }
-
-  if (action === "sleep") {
-    setGif("look");
-    return;
-  }
-
-  const anim = ACTION_ANIMS[action];
-  if (anim) {
-    const gifs = ["idle", "stand", "look"];
-    const gif = gifs[Math.floor(Math.random() * gifs.length)];
-    playAnim(anim, gif, 1200);
+  const def = ACTION_ANIMS[action];
+  if (def) {
+    playAgentAnim(agentId, def.anim, def.gif, 1200);
   }
 }
 
-function setMood(mood) {
-  currentMood = mood;
-  const upper = mood.toUpperCase();
-  if (moodText) moodText.textContent = upper;
-  if (statMood) statMood.textContent = upper;
-  // Set data-mood on a parent for CSS glow effects
-  pet.closest(".panel-center")?.setAttribute("data-mood", mood);
+// ======== Selection ========
+
+function selectAgent(agentId) {
+  selectedAgent = agentId;
+  document.querySelectorAll(".agent-slot").forEach(s => s.classList.remove("selected"));
+  const el = getSlotElements(agentId);
+  if (el) el.slot.classList.add("selected");
+
+  // Update panel header
+  const header = document.querySelector(".panel-right .panel-header");
+  if (header) header.textContent = `COMMS — ${AGENTS[agentId].name}`;
 }
 
 // ======== Session & Chat ========
 
-async function ensureSession() {
-  if (sessionId) return;
+async function ensureSession(agentId) {
+  const agent = AGENTS[agentId];
+  if (agent.session) return agent.session;
   const res = await fetch(`${API}/api/chat/sessions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
+    body: JSON.stringify({ agentId }),
   });
   const data = await res.json();
-  sessionId = data.sessionId;
+  agent.session = data.sessionId;
+  return agent.session;
 }
 
 function addMessage(role, text) {
@@ -125,9 +136,9 @@ function addMessage(role, text) {
   return div;
 }
 
-async function sendMessage(text) {
-  await ensureSession();
-  addMessage("user", text);
+async function sendMessage(agentId, text) {
+  const sessionId = await ensureSession(agentId);
+  addMessage("user", `[${AGENTS[agentId].name}] ${text}`);
   input.disabled = true;
   form.querySelector("button").disabled = true;
 
@@ -159,7 +170,7 @@ async function sendMessage(text) {
           eventType = line.slice(7).trim();
         } else if (line.startsWith("data: ") && eventType) {
           const data = JSON.parse(line.slice(6));
-          handleSSE(eventType, data, assistantDiv);
+          handleSSE(agentId, eventType, data, assistantDiv);
           fullText = assistantDiv.textContent;
           eventType = null;
         } else if (line === "") {
@@ -177,7 +188,7 @@ async function sendMessage(text) {
   input.focus();
 }
 
-function handleSSE(event, data, assistantDiv) {
+function handleSSE(agentId, event, data, assistantDiv) {
   switch (event) {
     case "text_delta":
       assistantDiv.textContent += data.text;
@@ -185,11 +196,10 @@ function handleSSE(event, data, assistantDiv) {
       break;
     case "tool_call":
       if (data.toolName === "set_pet_mood") {
-        setMood(data.args?.mood || "neutral");
-        addMessage("tool", `♦ MOOD → ${(data.args?.mood || "").toUpperCase()}`);
+        addMessage("tool", `♦ ${AGENTS[agentId].name} MOOD → ${(data.args?.mood || "").toUpperCase()}`);
       } else if (data.toolName === "pet_action") {
-        playAnimation(data.args?.action || "bounce");
-        addMessage("tool", `♦ ACT → ${(data.args?.action || "").toUpperCase()}`);
+        playAction(agentId, data.args?.action || "bounce");
+        addMessage("tool", `♦ ${AGENTS[agentId].name} ACT → ${(data.args?.action || "").toUpperCase()}`);
       }
       break;
     case "tool_result":
@@ -209,11 +219,16 @@ function showBubble(text) {
   bubbleTimer = setTimeout(() => bubble.classList.add("hidden"), 4000);
 }
 
-// ======== Interactions ========
+// ======== Event listeners ========
 
-pet.addEventListener("click", () => {
-  playAnimation("poke");
-  sendMessage("*用户戳了你一下*");
+// Click on any agent: select + poke
+document.querySelectorAll(".agent-slot").forEach(slot => {
+  slot.addEventListener("click", () => {
+    const agentId = slot.dataset.agent;
+    selectAgent(agentId);
+    pokeAgent(agentId);
+    sendMessage(agentId, "*用户戳了你一下*");
+  });
 });
 
 form.addEventListener("submit", (e) => {
@@ -221,16 +236,13 @@ form.addEventListener("submit", (e) => {
   const text = input.value.trim();
   if (!text) return;
   input.value = "";
-  sendMessage(text);
+  sendMessage(selectedAgent, text);
 });
 
 clearBtn.addEventListener("click", () => {
-  sessionId = null;
-  currentMood = "neutral";
-  if (moodText) moodText.textContent = "NEUTRAL";
-  if (statMood) statMood.textContent = "NEUTRAL";
+  Object.values(AGENTS).forEach(a => a.session = null);
   messagesEl.innerHTML = "";
-  setGif("idle");
+  Object.keys(AGENTS).forEach(id => setAgentGif(id, "idel"));
   showBubble("SYS RESET OK");
 });
 
@@ -242,4 +254,5 @@ chatToggle.classList.add("active");
 
 // ======== Init ========
 
-showBubble("CLICK ME!");
+selectAgent("eous");
+showBubble("CLICK A BANGBOO!");
