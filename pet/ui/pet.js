@@ -2,9 +2,6 @@
 
 const API = window.location.origin;
 const bubble = document.getElementById("speech-bubble");
-const messagesEl = document.getElementById("messages");
-const form = document.getElementById("chat-form");
-const input = document.getElementById("chat-input");
 const clearBtn = document.getElementById("clear-btn");
 const chatToggle = document.getElementById("chat-toggle");
 const contentGrid = document.getElementById("content-grid");
@@ -16,17 +13,54 @@ let bubbleTimer = null;
 const AGENTS = {
   eous:     { name: "EOUS",     prefix: "eous",     session: null },
   amillion: { name: "AMILLION", prefix: "amillion", session: null },
-  penguin:  { name: "PENGUIN",  prefix: "enguin",   session: null },  // file prefix is "enguin"
+  penguin:  { name: "PENGUIN",  prefix: "enguin",   session: null },
 };
 
-// GIF states per agent: idle, jump, touch
 function gifUrl(agentId, state) {
   const prefix = AGENTS[agentId].prefix;
   return `/ui/pet/gif/${prefix}-${state}.gif`;
 }
 
-// Currently selected agent for chat
 let selectedAgent = "eous";
+
+// ======== Chat tab elements ========
+
+const agentTabs = {};
+document.querySelectorAll(".chat-tab").forEach(tab => {
+  const id = tab.dataset.agent;
+  agentTabs[id] = {
+    tab,
+    label: tab.querySelector(".chat-tab-label"),
+    messages: tab.querySelector(".chat-tab-messages"),
+    form: tab.querySelector(".chat-tab-form"),
+    input: tab.querySelector(".chat-tab-input"),
+  };
+});
+
+// Tab click: expand that agent's chat
+Object.entries(agentTabs).forEach(([id, t]) => {
+  t.label.addEventListener("click", () => {
+    openChatTab(id);
+  });
+  t.form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = t.input.value.trim();
+    if (!text) return;
+    t.input.value = "";
+    sendMessage(id, text);
+  });
+});
+
+function openChatTab(agentId) {
+  selectedAgent = agentId;
+  Object.entries(agentTabs).forEach(([id, t]) => {
+    t.tab.classList.toggle("active", id === agentId);
+  });
+  // Also highlight pet
+  document.querySelectorAll(".agent-slot").forEach(s => s.classList.remove("selected"));
+  const el = getSlotElements(agentId);
+  if (el) el.slot.classList.add("selected");
+}
 
 // ======== Animation system ========
 
@@ -70,13 +104,10 @@ function setAgentGif(agentId, state) {
 function playAgentAnim(agentId, cssClass, gifState, duration) {
   const el = getSlotElements(agentId);
   if (!el) return;
-
   if (gifState) setAgentGif(agentId, gifState);
-
   el.pet.className = "agent-pet";
   void el.pet.offsetWidth;
   if (cssClass) el.pet.classList.add(cssClass);
-
   setTimeout(() => {
     el.pet.classList.remove(cssClass);
     setAgentGif(agentId, "idel");
@@ -89,27 +120,9 @@ function pokeAgent(agentId) {
 }
 
 function playAction(agentId, action) {
-  if (action === "poke") {
-    pokeAgent(agentId);
-    return;
-  }
+  if (action === "poke") { pokeAgent(agentId); return; }
   const def = ACTION_ANIMS[action];
-  if (def) {
-    playAgentAnim(agentId, def.anim, def.gif, 1200);
-  }
-}
-
-// ======== Selection ========
-
-function selectAgent(agentId) {
-  selectedAgent = agentId;
-  document.querySelectorAll(".agent-slot").forEach(s => s.classList.remove("selected"));
-  const el = getSlotElements(agentId);
-  if (el) el.slot.classList.add("selected");
-
-  // Update panel header
-  const header = document.querySelector(".panel-right .panel-header");
-  if (header) header.textContent = `COMMS — ${AGENTS[agentId].name}`;
+  if (def) playAgentAnim(agentId, def.anim, def.gif, 1200);
 }
 
 // ======== Session & Chat ========
@@ -127,22 +140,25 @@ async function ensureSession(agentId) {
   return agent.session;
 }
 
-function addMessage(role, text) {
+function addMessage(role, text, agentId) {
+  const t = agentTabs[agentId];
+  if (!t) return null;
   const div = document.createElement("div");
   div.className = `msg ${role}`;
   div.textContent = text;
-  messagesEl.appendChild(div);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  t.messages.appendChild(div);
+  t.messages.scrollTop = t.messages.scrollHeight;
   return div;
 }
 
 async function sendMessage(agentId, text) {
   const sessionId = await ensureSession(agentId);
-  addMessage("user", `[${AGENTS[agentId].name}] ${text}`);
-  input.disabled = true;
-  form.querySelector("button").disabled = true;
+  addMessage("user", text, agentId);
 
-  const assistantDiv = addMessage("assistant", "");
+  const t = agentTabs[agentId];
+  if (t) { t.input.disabled = true; t.form.querySelector("button").disabled = true; }
+
+  const assistantDiv = addMessage("assistant", "", agentId);
   let fullText = "";
 
   try {
@@ -183,23 +199,22 @@ async function sendMessage(agentId, text) {
   }
 
   if (fullText) showBubble(fullText);
-  input.disabled = false;
-  form.querySelector("button").disabled = false;
-  input.focus();
+  if (t) { t.input.disabled = false; t.form.querySelector("button").disabled = false; t.input.focus(); }
 }
 
 function handleSSE(agentId, event, data, assistantDiv) {
+  const t = agentTabs[agentId];
   switch (event) {
     case "text_delta":
       assistantDiv.textContent += data.text;
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+      if (t) t.messages.scrollTop = t.messages.scrollHeight;
       break;
     case "tool_call":
       if (data.toolName === "set_pet_mood") {
-        addMessage("tool", `♦ ${AGENTS[agentId].name} MOOD → ${(data.args?.mood || "").toUpperCase()}`);
+        addMessage("tool", `♦ ${AGENTS[agentId].name} MOOD → ${(data.args?.mood || "").toUpperCase()}`, agentId);
       } else if (data.toolName === "pet_action") {
         playAction(agentId, data.args?.action || "bounce");
-        addMessage("tool", `♦ ${AGENTS[agentId].name} ACT → ${(data.args?.action || "").toUpperCase()}`);
+        addMessage("tool", `♦ ${AGENTS[agentId].name} ACT → ${(data.args?.action || "").toUpperCase()}`, agentId);
       }
       break;
     case "tool_result":
@@ -221,27 +236,18 @@ function showBubble(text) {
 
 // ======== Event listeners ========
 
-// Click on any agent: select + poke
 document.querySelectorAll(".agent-slot").forEach(slot => {
   slot.addEventListener("click", () => {
     const agentId = slot.dataset.agent;
-    selectAgent(agentId);
+    openChatTab(agentId);
     pokeAgent(agentId);
     sendMessage(agentId, "*用户戳了你一下*");
   });
 });
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = "";
-  sendMessage(selectedAgent, text);
-});
-
 clearBtn.addEventListener("click", () => {
   Object.values(AGENTS).forEach(a => a.session = null);
-  messagesEl.innerHTML = "";
+  Object.values(agentTabs).forEach(t => t.messages.innerHTML = "");
   Object.keys(AGENTS).forEach(id => setAgentGif(id, "idel"));
   showBubble("SYS RESET OK");
 });
@@ -254,5 +260,5 @@ chatToggle.classList.add("active");
 
 // ======== Init ========
 
-selectAgent("eous");
+openChatTab("eous");
 showBubble("CLICK A BANGBOO!");
