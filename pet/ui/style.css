@@ -292,13 +292,14 @@ body {
 
 #pet {
   width: 256px;
-  height: 416px;
+  height: 320px;
   cursor: pointer;
   user-select: none;
   image-rendering: pixelated;
   -ms-interpolation-mode: nearest-neighbor;
   transition: filter 0.2s;
 }
+#pet:hover { filter: brightness(1.15); }
 #pet:active { transform: scale(0.94); }
 
 /* Mood label */
