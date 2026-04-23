@@ -47,19 +47,179 @@ Object.entries(agentTabs).forEach(([id, t]) => {
     const text = t.input.value.trim();
     if (!text) return;
     t.input.value = "";
-    sendMessage(id, text);
+    if (id === "group") {
+      sendGroupMessage(text);
+    } else {
+      sendMessage(id, text);
+    }
   });
 });
 
-function openChatTab(agentId) {
-  selectedAgent = agentId;
-  Object.entries(agentTabs).forEach(([id, t]) => {
-    t.tab.classList.toggle("active", id === agentId);
+// ======== Group chat ========
+
+const GROUP_STORAGE_KEY = "pet:groupChat";
+const MAX_GROUP_HISTORY = 20;
+const mutedAgents = new Set();
+
+let groupHistory = [];
+let groupDisplayMessages = [];
+
+function saveGroupState() {
+  try {
+    localStorage.setItem(GROUP_STORAGE_KEY, JSON.stringify({
+      history: groupHistory,
+      display: groupDisplayMessages,
+    }));
+  } catch (_) {}
+}
+
+function loadGroupState() {
+  try {
+    const raw = localStorage.getItem(GROUP_STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    groupHistory = data.history || [];
+    groupDisplayMessages = data.display || [];
+    const gt = agentTabs["group"];
+    if (gt) {
+      gt.messages.innerHTML = "";
+      for (const item of groupDisplayMessages) {
+        const div = document.createElement("div");
+        div.className = item.className;
+        div.textContent = item.text;
+        gt.messages.appendChild(div);
+      }
+      gt.messages.scrollTop = gt.messages.scrollHeight;
+    }
+  } catch (_) {}
+}
+
+document.querySelectorAll(".mute-toggle").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const aid = btn.dataset.agent;
+    btn.classList.toggle("muted");
+    if (mutedAgents.has(aid)) {
+      mutedAgents.delete(aid);
+    } else {
+      mutedAgents.add(aid);
+    }
   });
-  // Also highlight pet
+});
+
+function buildGroupContext(userMessage) {
+  if (groupHistory.length === 0) return userMessage;
+  const lines = groupHistory.map(e => `${e.sender}: ${e.body}`);
+  return `[Chat messages since your last reply - for context]\n${lines.join("\n")}\n\n[Current message - respond to this]\n${userMessage}`;
+}
+
+function addGroupMessage(role, text, fromAgentId) {
+  const gt = agentTabs["group"];
+  if (!gt) return null;
+  const div = document.createElement("div");
+  div.className = `msg ${role}`;
+  if (fromAgentId && role === "assistant") {
+    div.classList.add(`msg-${fromAgentId}`);
+    div.textContent = `[${AGENTS[fromAgentId].name}] ${text}`;
+  } else {
+    div.textContent = text;
+  }
+  gt.messages.appendChild(div);
+  gt.messages.scrollTop = gt.messages.scrollHeight;
+  if (text) {
+    groupDisplayMessages.push({ className: div.className, text: div.textContent });
+    saveGroupState();
+  }
+  return div;
+}
+
+async function sendGroupMessage(text) {
+  addGroupMessage("user", text);
+
+  const gt = agentTabs["group"];
+  if (gt) { gt.input.disabled = true; gt.form.querySelector("button").disabled = true; }
+
+  const activeAgents = Object.keys(AGENTS).filter(id => !mutedAgents.has(id));
+
+  for (const agentId of activeAgents) {
+    const sessionId = await ensureSession(agentId);
+    const enrichedText = buildGroupContext(text);
+
+    const assistantDiv = addGroupMessage("assistant", "", agentId);
+    let fullText = "";
+
+    try {
+      const res = await fetch(`${API}/api/chat/sessions/${sessionId}/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: enrichedText }),
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop();
+
+        let eventType = null;
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            eventType = line.slice(7).trim();
+          } else if (line.startsWith("data: ") && eventType) {
+            const data = JSON.parse(line.slice(6));
+            if (eventType === "text_delta") {
+              assistantDiv.textContent = `[${AGENTS[agentId].name}] ${(assistantDiv._rawText || "") + data.text}`;
+              assistantDiv._rawText = (assistantDiv._rawText || "") + data.text;
+              if (gt) gt.messages.scrollTop = gt.messages.scrollHeight;
+            } else if (eventType === "tool_call") {
+              if (data.toolName === "pet_action") {
+                playAction(agentId, data.args?.action || "bounce");
+              }
+            }
+            if (eventType === "text_delta") fullText = assistantDiv._rawText;
+            eventType = null;
+          } else if (line === "") {
+            eventType = null;
+          }
+        }
+      }
+    } catch (err) {
+      assistantDiv.textContent += " [ERR]";
+    }
+
+    if (fullText) {
+      groupHistory.push({ sender: AGENTS[agentId].name, body: fullText });
+      while (groupHistory.length > MAX_GROUP_HISTORY) groupHistory.shift();
+      // Update the display record with final text
+      const lastEmpty = groupDisplayMessages.findLastIndex(d => d.text === `[${AGENTS[agentId].name}] `);
+      if (lastEmpty >= 0) groupDisplayMessages[lastEmpty].text = assistantDiv.textContent;
+      saveGroupState();
+      showBubble(fullText);
+    }
+  }
+
+  groupHistory.push({ sender: "USER", body: text });
+  while (groupHistory.length > MAX_GROUP_HISTORY) groupHistory.shift();
+  saveGroupState();
+
+  if (gt) { gt.input.disabled = false; gt.form.querySelector("button").disabled = false; gt.input.focus(); }
+}
+
+function openChatTab(tabId) {
+  selectedAgent = tabId === "group" ? "eous" : tabId;
+  Object.entries(agentTabs).forEach(([id, t]) => {
+    t.tab.classList.toggle("active", id === tabId);
+  });
   document.querySelectorAll(".agent-slot").forEach(s => s.classList.remove("selected"));
-  const el = getSlotElements(agentId);
-  if (el) el.slot.classList.add("selected");
+  if (tabId !== "group") {
+    const el = getSlotElements(tabId);
+    if (el) el.slot.classList.add("selected");
+  }
 }
 
 // ======== Animation system ========
@@ -272,9 +432,11 @@ clearBtn.addEventListener("click", () => {
     a.session = null;
   });
   Object.values(agentTabs).forEach(t => t.messages.innerHTML = "");
+  groupHistory.length = 0;
+  groupDisplayMessages.length = 0;
+  try { localStorage.removeItem(GROUP_STORAGE_KEY); } catch (_) {}
   Object.keys(AGENTS).forEach(id => setAgentGif(id, "idel"));
   showBubble("SYS RESET OK");
-  // Re-create fresh sessions
   Object.keys(AGENTS).forEach(id => ensureSession(id));
 });
 
@@ -417,8 +579,11 @@ document.querySelectorAll(".agent-slot").forEach(slot => {
 
 // ======== Init ========
 
-openChatTab("eous");
+openChatTab("group");
 showBubble("CLICK A BANGBOO!");
+
+// Restore group chat from localStorage
+loadGroupState();
 
 // Preload sessions to restore chat history
 Object.keys(AGENTS).forEach(id => ensureSession(id));
