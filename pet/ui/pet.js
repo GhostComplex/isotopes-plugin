@@ -10,6 +10,8 @@ const messagesEl = document.getElementById("messages");
 const form = document.getElementById("chat-form");
 const input = document.getElementById("chat-input");
 const clearBtn = document.getElementById("clear-btn");
+const chatToggle = document.getElementById("chat-toggle");
+const contentGrid = document.getElementById("content-grid");
 
 const PX = 8; // pixel scale factor
 const W = canvas.width / PX;  // 32 logical pixels
@@ -683,6 +685,12 @@ clearBtn.addEventListener("click", () => {
   playAnim("idle");
   showBubble("SYS RESET OK");
 });
+
+chatToggle.addEventListener("click", () => {
+  contentGrid.classList.toggle("chat-hidden");
+  chatToggle.classList.toggle("active", !contentGrid.classList.contains("chat-hidden"));
+});
+chatToggle.classList.add("active");
 
 // ========== INIT ==========
 

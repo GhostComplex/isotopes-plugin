@@ -75,6 +75,18 @@ body {
 }
 #clear-btn:hover { background: #ff8855; }
 
+#chat-toggle {
+  background: var(--green-dim);
+  color: var(--bg);
+  border: 2px solid var(--green-dark);
+  padding: 4px 12px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  cursor: pointer;
+}
+#chat-toggle:hover { background: var(--green); }
+#chat-toggle.active { background: var(--green); }
+
 /* ======== MAIN FRAME ======== */
 
 #frame {
@@ -146,9 +158,20 @@ body {
 
 #content-grid {
   display: grid;
-  grid-template-columns: 200px 1fr 280px;
+  grid-template-columns: 200px 1fr 380px;
   flex: 1;
   min-height: 0;
+  transition: grid-template-columns 0.3s;
+}
+#content-grid.chat-hidden {
+  grid-template-columns: 200px 1fr 0px;
+}
+#content-grid.chat-hidden .panel-right {
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  border: none;
+  padding: 0;
 }
 
 /* ======== PANELS ======== */
