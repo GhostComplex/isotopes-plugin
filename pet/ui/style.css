@@ -3,15 +3,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 :root {
-  --bg: #0a0a12;
-  --panel: #12121e;
-  --border: #2a2a3a;
+  --bg: #0c0c0e;
+  --panel: #161618;
+  --border: #2a2a2e;
   --green: #4dff7c;
   --green-dim: #1a6b35;
   --green-dark: #0d3d1e;
   --orange: #ff6a2f;
   --orange-dim: #cc4e1a;
-  --cream: #e8e0d0;
+
   --pixel: 4px;
   --text: #c0c8b8;
   --text-dim: #5a6058;
@@ -354,8 +354,8 @@ body {
   position: absolute;
   bottom: 0; left: 0;
   width: 90px; height: 56px;
-  background: #6b4a3a;
-  border: 2px solid #4a3228;
+  background: #3a3a40;
+  border: 2px solid #2a2a30;
 }
 /* Wall brick texture */
 .bldg-ramen .wall::before {
@@ -371,8 +371,8 @@ body {
   position: absolute;
   bottom: 20px; left: -2px;
   width: 94px; height: 10px;
-  background: repeating-linear-gradient(90deg, #c84030 0px, #c84030 6px, #e85848 6px, #e85848 12px);
-  border: 1px solid #a03028;
+  background: repeating-linear-gradient(90deg, var(--orange-dim) 0px, var(--orange-dim) 6px, var(--orange) 6px, var(--orange) 12px);
+  border: 1px solid #a03020;
   box-shadow: 0 2px 0 rgba(0,0,0,0.2);
 }
 /* Sign board */
@@ -380,30 +380,30 @@ body {
   position: absolute;
   bottom: 32px; left: 8px;
   width: 50px; height: 16px;
-  background: #e8d0a0;
-  border: 2px solid #a08060;
+  background: #1e1e24;
+  border: 2px solid var(--green-dim);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Press Start 2P', monospace;
   font-size: 6px;
-  color: #c84030;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+  color: var(--green);
+  text-shadow: 0 0 4px rgba(77,255,124,0.4);
 }
 /* Windows */
 .bldg-ramen .win {
   position: absolute;
   width: 12px; height: 14px;
-  background: #2a4038;
-  border: 2px solid #4a3228;
-  box-shadow: inset 0 0 3px rgba(255,200,100,0.15);
+  background: #1a1a20;
+  border: 2px solid #2a2a30;
+  box-shadow: inset 0 0 3px rgba(77,255,124,0.1);
 }
 .bldg-ramen .win::after {
   content: "";
   position: absolute;
   top: 0; left: 50%;
   width: 1px; height: 100%;
-  background: #4a3228;
+  background: #2a2a30;
 }
 /* Door */
 .bldg-ramen .door {
@@ -411,16 +411,16 @@ body {
   bottom: 2px; left: 50%;
   transform: translateX(-50%);
   width: 14px; height: 18px;
-  background: #3a2a20;
-  border: 2px solid #4a3228;
-  box-shadow: inset 0 0 4px rgba(255,180,80,0.2);
+  background: #1a1a20;
+  border: 2px solid #2a2a30;
+  box-shadow: inset 0 0 4px rgba(255,106,47,0.15);
 }
 .bldg-ramen .door::after {
   content: "";
   position: absolute;
   top: 6px; right: 2px;
   width: 2px; height: 2px;
-  background: #c8a060;
+  background: var(--orange);
   border-radius: 50%;
 }
 /* Rooftop — AC unit */
@@ -428,48 +428,48 @@ body {
   position: absolute;
   top: 0; left: 10px;
   width: 30px; height: 18px;
-  background: #888078;
-  border: 2px solid #686058;
+  background: #505058;
+  border: 2px solid #404048;
 }
 .bldg-ramen .rooftop::before {
   content: "";
   position: absolute;
   top: 3px; left: 3px;
   width: 8px; height: 10px;
-  background: repeating-linear-gradient(0deg, #686058 0px, #686058 2px, #787068 2px, #787068 4px);
-  border: 1px solid #585048;
+  background: repeating-linear-gradient(0deg, #404048 0px, #404048 2px, #4a4a50 2px, #4a4a50 4px);
+  border: 1px solid #383840;
 }
 .bldg-ramen .rooftop::after {
   content: "";
   position: absolute;
   top: 2px; right: 3px;
   width: 10px; height: 6px;
-  background: #585048;
-  border: 1px solid #484038;
+  background: #383840;
+  border: 1px solid #303038;
 }
 /* Pipe */
 .bldg-ramen .pipe {
   position: absolute;
   top: 16px; left: 8px;
   width: 3px; height: 14px;
-  background: #686058;
-  border: 1px solid #585048;
+  background: #484850;
+  border: 1px solid #383840;
 }
 .bldg-ramen .pipe::after {
   content: "";
   position: absolute;
   bottom: 0; left: -2px;
   width: 7px; height: 3px;
-  background: #686058;
-  border: 1px solid #585048;
+  background: #484850;
+  border: 1px solid #383840;
 }
 /* Lanterns */
 .bldg-ramen .lantern {
   position: absolute;
   width: 6px; height: 8px;
-  background: radial-gradient(circle, #ff6040 30%, #cc3020 100%);
+  background: radial-gradient(circle, var(--orange) 30%, var(--orange-dim) 100%);
   border-radius: 1px;
-  box-shadow: 0 0 4px rgba(255,96,64,0.4);
+  box-shadow: 0 0 4px rgba(255,106,47,0.4);
   animation: lantern-sway 3s ease-in-out infinite;
 }
 @keyframes lantern-sway {
@@ -486,32 +486,32 @@ body {
   position: absolute;
   bottom: 0; left: 0;
   width: 80px; height: 52px;
-  background: #485868;
-  border: 2px solid #384858;
+  background: #343438;
+  border: 2px solid #28282e;
 }
-/* Teal lower trim */
+/* Lower trim */
 .bldg-coffee .wall::before {
   content: "";
   position: absolute;
   bottom: 0; left: 0; right: 0;
   height: 14px;
-  background: #3a6858;
-  border-top: 2px solid #2a5848;
+  background: #2a2a30;
+  border-top: 2px solid #222228;
 }
 /* Glass panels */
 .bldg-coffee .glass {
   position: absolute;
   width: 16px; height: 22px;
-  background: linear-gradient(180deg, #506858 0%, #3a5848 100%);
-  border: 2px solid #2a4838;
-  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.05);
+  background: linear-gradient(180deg, #1e1e24 0%, #16161c 100%);
+  border: 2px solid #2a2a30;
+  box-shadow: inset 1px 1px 0 rgba(77,255,124,0.04);
 }
 .bldg-coffee .glass::after {
   content: "";
   position: absolute;
   top: 2px; left: 2px;
   width: 4px; height: 8px;
-  background: rgba(255,255,255,0.06);
+  background: rgba(77,255,124,0.06);
 }
 /* Coffee sign */
 .bldg-coffee .sign {
@@ -519,53 +519,54 @@ body {
   bottom: 14px; left: 50%;
   transform: translateX(-50%);
   width: 46px; height: 10px;
-  background: #2a2a2e;
-  border: 1px solid #585048;
+  background: #1a1a20;
+  border: 1px solid var(--orange-dim);
   font-family: 'Press Start 2P', monospace;
   font-size: 5px;
-  color: #e8d0a0;
+  color: var(--orange);
   display: flex;
   align-items: center;
   justify-content: center;
   letter-spacing: 1px;
+  text-shadow: 0 0 3px rgba(255,106,47,0.4);
 }
 /* Upper section — billboard */
 .bldg-coffee .billboard {
   position: absolute;
   top: 8px; left: 4px;
   width: 72px; height: 24px;
-  background: #a08050;
-  border: 2px solid #806838;
+  background: #2e2e34;
+  border: 2px solid #222228;
 }
 .bldg-coffee .billboard::before {
   content: "";
   position: absolute;
   inset: 3px;
-  background: #c8a060;
-  border: 1px solid #a08050;
+  background: #38383e;
+  border: 1px solid #2e2e34;
 }
 /* Rooftop equipment */
 .bldg-coffee .rooftop {
   position: absolute;
   top: 0; left: 15px;
   width: 50px; height: 12px;
-  background: #686868;
-  border: 2px solid #505050;
+  background: #505058;
+  border: 2px solid #404048;
 }
 .bldg-coffee .rooftop::before {
   content: "";
   position: absolute;
   top: 2px; left: 4px;
   width: 14px; height: 6px;
-  background: repeating-linear-gradient(90deg, #585858 0px, #585858 2px, #484848 2px, #484848 4px);
-  border: 1px solid #404040;
+  background: repeating-linear-gradient(90deg, #484850 0px, #484850 2px, #3e3e46 2px, #3e3e46 4px);
+  border: 1px solid #383840;
 }
 .bldg-coffee .rooftop::after {
   content: "";
   position: absolute;
   top: -4px; right: 8px;
   width: 4px; height: 6px;
-  background: #c04030;
+  background: var(--orange-dim);
   border: 1px solid #a03020;
 }
 /* Pipe */
@@ -573,16 +574,16 @@ body {
   position: absolute;
   top: 10px; right: 4px;
   width: 3px; height: 22px;
-  background: #607060;
-  border-right: 1px solid #506050;
+  background: #484850;
+  border-right: 1px solid #3e3e46;
 }
 /* 24h sign */
 .bldg-coffee .badge {
   position: absolute;
   top: 12px; left: 2px;
   width: 16px; height: 18px;
-  background: #d86878;
-  border: 2px solid #b85060;
+  background: var(--orange);
+  border: 2px solid var(--orange-dim);
   font-family: 'Press Start 2P', monospace;
   font-size: 6px;
   color: #fff;
@@ -601,8 +602,8 @@ body {
   position: absolute;
   bottom: 0; left: 0;
   width: 100px; height: 50px;
-  background: #685840;
-  border: 2px solid #504030;
+  background: #38383e;
+  border: 2px solid #2a2a30;
 }
 /* Peeling wall texture */
 .bldg-chinese .wall::before {
@@ -610,8 +611,8 @@ body {
   position: absolute;
   top: 4px; left: 4px;
   width: 30px; height: 20px;
-  background: #608078;
-  border: 1px solid #507068;
+  background: #303038;
+  border: 1px solid #28282e;
   opacity: 0.5;
 }
 /* Counter bar */
@@ -619,57 +620,57 @@ body {
   position: absolute;
   bottom: 2px; left: 20px;
   width: 60px; height: 8px;
-  background: #a08050;
-  border: 2px solid #806838;
+  background: #4a4a50;
+  border: 2px solid #3a3a40;
 }
 .bldg-chinese .counter::before {
   content: "";
   position: absolute;
   top: -2px; left: 8px;
   width: 6px; height: 4px;
-  background: #c8a060;
+  background: #5a5a60;
   border-radius: 2px 2px 0 0;
-  box-shadow: 12px 0 0 #c8a060, 24px 0 0 #c8a060, 36px 0 0 #c8a060;
+  box-shadow: 12px 0 0 #5a5a60, 24px 0 0 #5a5a60, 36px 0 0 #5a5a60;
 }
 /* Stools */
 .bldg-chinese .stool {
   position: absolute;
   bottom: -4px;
   width: 6px; height: 6px;
-  background: #a08060;
+  background: #505058;
   border-radius: 50%;
-  border: 1px solid #806040;
+  border: 1px solid #404048;
 }
 /* Main sign */
 .bldg-chinese .sign {
   position: absolute;
   top: 14px; left: 24px;
   width: 52px; height: 22px;
-  background: #e8d8c0;
-  border: 2px solid #a09070;
+  background: #1e1e24;
+  border: 2px solid var(--orange-dim);
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
-  color: #c84030;
+  color: var(--orange);
   display: flex;
   align-items: center;
   justify-content: center;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+  text-shadow: 0 0 4px rgba(255,106,47,0.4);
 }
 /* Upper structure */
 .bldg-chinese .upper {
   position: absolute;
   top: 0; left: 0;
   width: 100px; height: 18px;
-  background: #806848;
-  border: 2px solid #685838;
+  background: #2e2e34;
+  border: 2px solid #222228;
 }
 .bldg-chinese .upper::before {
   content: "";
   position: absolute;
   top: 2px; left: 4px;
   width: 40px; height: 10px;
-  background: #585048;
-  border: 1px solid #484038;
+  background: #282830;
+  border: 1px solid #202028;
   background-image:
     repeating-linear-gradient(90deg, transparent 0px, transparent 8px, rgba(0,0,0,0.1) 8px, rgba(0,0,0,0.1) 10px);
 }
@@ -678,29 +679,29 @@ body {
   position: absolute;
   top: 16px; right: 8px;
   width: 18px; height: 22px;
-  background: #4080a0;
-  border: 2px solid #306880;
-  box-shadow: inset 0 0 4px rgba(0,0,0,0.2);
+  background: #2a2a30;
+  border: 2px solid var(--green-dim);
+  box-shadow: inset 0 0 4px rgba(77,255,124,0.1);
 }
 /* Lantern string */
 .bldg-chinese .lantern-string {
   position: absolute;
   top: 38px; left: 22px;
   width: 56px; height: 1px;
-  background: #504030;
+  background: #3a3a40;
 }
 .bldg-chinese .lantern-string::before {
   content: "";
   position: absolute;
   top: 0; left: 6px;
   width: 5px; height: 5px;
-  background: radial-gradient(circle, #ff8840 30%, #cc6020 100%);
+  background: radial-gradient(circle, var(--orange) 30%, var(--orange-dim) 100%);
   border-radius: 50%;
   box-shadow:
-    10px 1px 0 0 #ff8840,
-    20px -1px 0 0 #ff8840,
-    30px 1px 0 0 #ff8840,
-    40px 0 0 0 #ff8840;
+    10px 1px 0 0 var(--orange),
+    20px -1px 0 0 var(--orange),
+    30px 1px 0 0 var(--orange),
+    40px 0 0 0 var(--orange);
   animation: lantern-sway 4s ease-in-out infinite;
 }
 
@@ -713,8 +714,8 @@ body {
   position: absolute;
   bottom: 0; left: 0;
   width: 80px; height: 50px;
-  background: #485060;
-  border: 2px solid #384050;
+  background: #323238;
+  border: 2px solid #26262c;
 }
 /* Brick section */
 .bldg-tech .wall::before {
@@ -723,17 +724,17 @@ body {
   top: 0; left: 0;
   width: 24px; height: 100%;
   background:
-    repeating-linear-gradient(0deg, #685040 0px, #685040 5px, #785848 5px, #785848 6px),
+    repeating-linear-gradient(0deg, #3a3a40 0px, #3a3a40 5px, #424248 5px, #424248 6px),
     repeating-linear-gradient(90deg, transparent 0px, transparent 10px, rgba(0,0,0,0.08) 10px, rgba(0,0,0,0.08) 11px);
-  border-right: 2px solid #384050;
+  border-right: 2px solid #26262c;
 }
 /* Screen/monitor */
 .bldg-tech .screen {
   position: absolute;
   width: 14px; height: 12px;
-  background: #3080a0;
-  border: 2px solid #384050;
-  box-shadow: 0 0 4px rgba(48,128,160,0.3);
+  background: #0d3d1e;
+  border: 2px solid #26262c;
+  box-shadow: 0 0 4px rgba(77,255,124,0.2);
   animation: screen-flicker 6s ease-in-out infinite;
 }
 .bldg-tech .screen::before {
@@ -741,7 +742,7 @@ body {
   position: absolute;
   inset: 1px;
   background:
-    repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(255,255,255,0.04) 2px, rgba(255,255,255,0.04) 3px);
+    repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(77,255,124,0.04) 2px, rgba(77,255,124,0.04) 3px);
 }
 @keyframes screen-flicker {
   0%, 90%, 100% { opacity: 1; }
@@ -753,8 +754,8 @@ body {
   position: absolute;
   top: 4px; left: 30px;
   width: 40px; height: 12px;
-  background: #2a3040;
-  border: 1px solid #4a5060;
+  background: #1a1a20;
+  border: 1px solid #2e2e34;
   font-family: 'Press Start 2P', monospace;
   font-size: 4px;
   color: #4dff7c;
@@ -768,8 +769,8 @@ body {
   position: absolute;
   top: 0; left: 20px;
   width: 40px; height: 14px;
-  background: #606060;
-  border: 2px solid #484848;
+  background: #484850;
+  border: 2px solid #3a3a42;
 }
 .bldg-tech .rooftop::before {
   content: "";
@@ -777,15 +778,15 @@ body {
   top: 3px; left: 4px;
   width: 10px; height: 6px;
   border-radius: 50%;
-  background: #505050;
-  border: 1px solid #404040;
-  box-shadow: 14px 0 0 #505050;
+  background: #404048;
+  border: 1px solid #343438;
+  box-shadow: 14px 0 0 #404048;
 }
 /* Cables */
 .bldg-tech .cable {
   position: absolute;
   width: 2px;
-  background: #504840;
+  background: #3a3a40;
 }
 
 /* ==== SMALL STALL (accent piece) ==== */
@@ -797,26 +798,26 @@ body {
   position: absolute;
   bottom: 0; left: 0;
   width: 40px; height: 28px;
-  background: #7a5040;
-  border: 2px solid #604030;
+  background: #343438;
+  border: 2px solid #28282e;
 }
 .bldg-stall .awning {
   position: absolute;
   top: 0; left: -2px;
   width: 44px; height: 8px;
-  background: repeating-linear-gradient(90deg, #e8c840 0px, #e8c840 5px, #d0b030 5px, #d0b030 10px);
-  border: 1px solid #b09820;
+  background: repeating-linear-gradient(90deg, var(--orange) 0px, var(--orange) 5px, var(--orange-dim) 5px, var(--orange-dim) 10px);
+  border: 1px solid #a03020;
   box-shadow: 0 2px 0 rgba(0,0,0,0.15);
 }
 .bldg-stall .sign {
   position: absolute;
   bottom: 10px; left: 4px;
   width: 32px; height: 8px;
-  background: #504030;
-  border: 1px solid #685040;
+  background: #2a2a30;
+  border: 1px solid #3a3a40;
   font-family: 'Press Start 2P', monospace;
   font-size: 4px;
-  color: #e8d0a0;
+  color: var(--green);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -831,8 +832,8 @@ body {
   position: absolute;
   bottom: 0; left: 0;
   width: 110px; height: 58px;
-  background: #3a3050;
-  border: 2px solid #2a2040;
+  background: #2e2e34;
+  border: 2px solid #222228;
 }
 /* Brick/panel texture */
 .bldg-arcade .arcade-wall::before {
@@ -849,7 +850,7 @@ body {
   position: absolute;
   bottom: 0; left: 0; right: 0;
   height: 6px;
-  background: linear-gradient(90deg, #c040a0, #6040c0, #4080c0);
+  background: linear-gradient(90deg, var(--green-dim), var(--orange-dim), var(--green-dim));
   opacity: 0.6;
 }
 /* Upper structure */
@@ -857,15 +858,15 @@ body {
   position: absolute;
   top: 0; left: 8px;
   width: 94px; height: 28px;
-  background: #484058;
-  border: 2px solid #383048;
+  background: #343438;
+  border: 2px solid #28282e;
 }
 .bldg-arcade .arcade-upper::before {
   content: "";
   position: absolute;
   inset: 3px;
   background:
-    repeating-linear-gradient(90deg, #3a3248 0px, #3a3248 8px, #322a40 8px, #322a40 10px);
+    repeating-linear-gradient(90deg, #2e2e34 0px, #2e2e34 8px, #282830 8px, #282830 10px);
 }
 /* Main sign */
 .bldg-arcade .arcade-sign {
@@ -873,16 +874,16 @@ body {
   top: 30px; left: 50%;
   transform: translateX(-50%);
   width: 60px; height: 14px;
-  background: #1a1028;
-  border: 2px solid #c040a0;
+  background: #1a1a20;
+  border: 2px solid var(--green);
   font-family: 'Press Start 2P', monospace;
   font-size: 6px;
-  color: #ff60c0;
+  color: var(--green);
   display: flex;
   align-items: center;
   justify-content: center;
-  text-shadow: 0 0 6px rgba(255,96,192,0.6);
-  box-shadow: 0 0 8px rgba(192,64,160,0.3), inset 0 0 6px rgba(192,64,160,0.1);
+  text-shadow: 0 0 6px rgba(77,255,124,0.6);
+  box-shadow: 0 0 8px rgba(77,255,124,0.3), inset 0 0 6px rgba(77,255,124,0.1);
   animation: neon-pulse 2.5s ease-in-out infinite;
 }
 /* Japanese sub-sign */
@@ -892,8 +893,8 @@ body {
   transform: translateX(-50%);
   font-family: 'Press Start 2P', monospace;
   font-size: 4px;
-  color: #80c0ff;
-  text-shadow: 0 0 4px rgba(128,192,255,0.5);
+  color: var(--green-dim);
+  text-shadow: 0 0 4px rgba(77,255,124,0.3);
   letter-spacing: 1px;
 }
 /* Marquee stripe */
@@ -902,10 +903,10 @@ body {
   bottom: 34px; left: 2px; right: 2px;
   height: 4px;
   background: repeating-linear-gradient(90deg,
-    #ff4080 0px, #ff4080 4px,
-    #ffc040 4px, #ffc040 8px,
-    #40c0ff 8px, #40c0ff 12px,
-    #80ff40 12px, #80ff40 16px
+    var(--green) 0px, var(--green) 4px,
+    var(--orange) 4px, var(--orange) 8px,
+    var(--green-dim) 8px, var(--green-dim) 12px,
+    var(--orange-dim) 12px, var(--orange-dim) 16px
   );
   animation: marquee-scroll 3s linear infinite;
 }
@@ -917,9 +918,9 @@ body {
 .bldg-arcade .arcade-screen {
   position: absolute;
   width: 16px; height: 14px;
-  background: #103040;
-  border: 2px solid #2a2040;
-  box-shadow: 0 0 6px rgba(48,128,160,0.3);
+  background: #0e1e14;
+  border: 2px solid #222228;
+  box-shadow: 0 0 6px rgba(77,255,124,0.2);
   animation: screen-flicker 5s ease-in-out infinite;
 }
 .bldg-arcade .arcade-screen::before {
@@ -942,9 +943,9 @@ body {
   bottom: 2px; left: 50%;
   transform: translateX(-50%);
   width: 16px; height: 20px;
-  background: #1a1028;
-  border: 2px solid #2a2040;
-  box-shadow: inset 0 0 6px rgba(192,64,160,0.15);
+  background: #1a1a20;
+  border: 2px solid #222228;
+  box-shadow: inset 0 0 6px rgba(77,255,124,0.1);
 }
 .bldg-arcade .arcade-door::before {
   content: "";
@@ -952,16 +953,16 @@ body {
   top: 50%; left: 50%;
   transform: translate(-50%,-50%);
   width: 2px; height: 8px;
-  background: rgba(192,64,160,0.4);
+  background: rgba(77,255,124,0.3);
 }
 .bldg-arcade .arcade-door::after {
   content: "";
   position: absolute;
   top: 6px; right: 2px;
   width: 2px; height: 2px;
-  background: #c040a0;
+  background: var(--green);
   border-radius: 50%;
-  box-shadow: 0 0 3px rgba(192,64,160,0.5);
+  box-shadow: 0 0 3px rgba(77,255,124,0.5);
 }
 /* Rooftop AC units */
 .bldg-arcade .arcade-ac {
@@ -1009,16 +1010,16 @@ body {
   position: absolute;
   bottom: 56px; left: 4px; right: 4px;
   height: 2px;
-  background: linear-gradient(90deg, #c040a0, #6040c0, #4080c0);
-  box-shadow: 0 0 6px rgba(192,64,160,0.4);
+  background: linear-gradient(90deg, var(--green), var(--orange), var(--green));
+  box-shadow: 0 0 6px rgba(77,255,124,0.4);
   animation: neon-pulse 2s ease-in-out infinite;
 }
 /* Posters */
 .bldg-arcade .arcade-poster {
   position: absolute;
   width: 12px; height: 16px;
-  background: #604020;
-  border: 1px solid #503018;
+  background: #2a2a30;
+  border: 1px solid #3a3a40;
   box-shadow: inset 0 0 3px rgba(0,0,0,0.3);
 }
 .bldg-arcade .arcade-poster::before {
@@ -1026,7 +1027,7 @@ body {
   position: absolute;
   top: 2px; left: 2px; right: 2px;
   height: 6px;
-  background: rgba(255,200,100,0.15);
+  background: rgba(77,255,124,0.1);
 }
 
 @keyframes neon-pulse {
@@ -1364,7 +1365,7 @@ body {
   border-left: 3px solid var(--green);
 }
 .msg.msg-amillion {
-  border-left: 3px solid #c8ff2e;
+  border-left: 3px solid var(--green-dim);
 }
 .msg.msg-penguin {
   border-left: 3px solid var(--orange);
