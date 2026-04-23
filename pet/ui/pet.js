@@ -125,15 +125,13 @@ function addGroupMessage(role, text, fromAgentId) {
   }
   gt.messages.appendChild(div);
   gt.messages.scrollTop = gt.messages.scrollHeight;
-  if (text) {
-    groupDisplayMessages.push({ className: div.className, text: div.textContent });
-    saveGroupState();
-  }
   return div;
 }
 
 async function sendGroupMessage(text) {
   addGroupMessage("user", text);
+  groupDisplayMessages.push({ className: "msg user", text });
+  saveGroupState();
 
   const gt = agentTabs["group"];
   if (gt) { gt.input.disabled = true; gt.form.querySelector("button").disabled = true; }
@@ -195,9 +193,7 @@ async function sendGroupMessage(text) {
     if (fullText) {
       groupHistory.push({ sender: AGENTS[agentId].name, body: fullText });
       while (groupHistory.length > MAX_GROUP_HISTORY) groupHistory.shift();
-      // Update the display record with final text
-      const lastEmpty = groupDisplayMessages.findLastIndex(d => d.text === `[${AGENTS[agentId].name}] `);
-      if (lastEmpty >= 0) groupDisplayMessages[lastEmpty].text = assistantDiv.textContent;
+      groupDisplayMessages.push({ className: `msg assistant msg-${agentId}`, text: assistantDiv.textContent });
       saveGroupState();
       showBubble(fullText);
     }
