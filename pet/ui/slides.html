@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Isotopes / Slides</title>
+  <link rel="stylesheet" href="/ui/pet/slides.css">
+</head>
+<body>
+  <div class="crt-overlay"></div>
+
+  <div class="top-bar">
+    <div class="dots">
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+    <div class="top-title"><span>Project Isotopes</span> / Slides</div>
+    <div class="zoom-ctrl">
+      <span class="zoom-label">ZOOM</span>
+      <input type="range" id="zoom-slider" min="50" max="200" value="100" step="5">
+      <span class="zoom-val" id="zoom-val">100%</span>
+    </div>
+    <a href="/ui/pet/" class="btn-back">BACK</a>
+  </div>
+
+  <div class="main">
+    <div class="slide-counter" id="counter">01 / 15</div>
+    <div class="slide-area" id="slide-area"></div>
+    <div class="nav-bar">
+      <button class="nav-btn" id="btn-prev" disabled>◀</button>
+      <button class="nav-btn" id="btn-next">▶</button>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:6.67%"></div>
+    </div>
+  </div>
+
+  <div class="footer">PROJECT ISOTOPES -- SLIDES TERMINAL / SYS.8BIT</div>
+
+  <script src="/ui/pet/slides.js"></script>
+</body>
+</html>

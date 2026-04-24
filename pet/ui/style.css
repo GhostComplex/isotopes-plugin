@@ -1359,6 +1359,15 @@ body {
   font-size: 9px;
   padding: 4px 10px;
 }
+.msg.cross {
+  align-self: flex-start;
+  background: rgba(255,106,47,0.08);
+  color: var(--orange);
+  border-color: var(--orange-dim);
+  font-size: 9px;
+  padding: 6px 10px;
+  opacity: 0.85;
+}
 
 /* Group chat agent-colored messages */
 .msg.msg-eous {

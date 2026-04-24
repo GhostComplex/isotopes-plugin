@@ -384,6 +384,14 @@ async function sendMessage(agentId, text) {
   setAgentStatus(agentId, "IDLE");
   updateCtxBar(agentId);
   if (t) { t.input.disabled = false; t.form.querySelector("button").disabled = false; t.input.focus(); }
+
+  if (fullText) {
+    const mentions = extractMentions(fullText, agentId);
+    console.log(`[mention] ${agentId} said:`, fullText.slice(0, 100), "→ mentions:", mentions);
+    for (const targetId of mentions) {
+      await sendCrossAgentMessage(agentId, targetId, fullText, 1);
+    }
+  }
 }
 
 function handleSSE(agentId, event, data, assistantDiv) {
@@ -407,6 +415,81 @@ function handleSSE(agentId, event, data, assistantDiv) {
     case "error":
       assistantDiv.textContent += ` [${data.message}]`;
       break;
+  }
+}
+
+// ======== Cross-agent @mention ========
+
+const MENTION_RE = /@(eous|amillion|penguin)/gi;
+const MAX_MENTION_DEPTH = 3;
+
+function extractMentions(text, excludeId) {
+  const mentions = new Set();
+  let m;
+  while ((m = MENTION_RE.exec(text)) !== null) {
+    const id = m[1].toLowerCase();
+    if (id !== excludeId && AGENTS[id]) mentions.add(id);
+  }
+  MENTION_RE.lastIndex = 0;
+  return [...mentions];
+}
+
+async function sendCrossAgentMessage(fromId, toId, text, depth) {
+  if (depth > MAX_MENTION_DEPTH) return;
+
+  const sessionId = await ensureSession(toId);
+  const fromName = AGENTS[fromId].name;
+  const toName = AGENTS[toId].name;
+
+  addMessage("cross", `[${fromName} → ${toName}] ${text.length > 80 ? text.slice(0, 77) + "..." : text}`, toId);
+
+  setAgentStatus(toId, "CHAT");
+  const assistantDiv = addMessage("assistant", "", toId);
+  let fullText = "";
+
+  try {
+    const prompt = `[Message from ${fromName} to you]\n${text}`;
+    const res = await fetch(`${API}/api/chat/sessions/${sessionId}/message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: prompt }),
+    });
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop();
+      let eventType = null;
+      for (const line of lines) {
+        if (line.startsWith("event: ")) {
+          eventType = line.slice(7).trim();
+        } else if (line.startsWith("data: ") && eventType) {
+          const data = JSON.parse(line.slice(6));
+          handleSSE(toId, eventType, data, assistantDiv);
+          fullText = assistantDiv.textContent;
+          eventType = null;
+        } else if (line === "") {
+          eventType = null;
+        }
+      }
+    }
+  } catch (err) {
+    assistantDiv.textContent += " [ERR]";
+  }
+
+  if (fullText) showBubble(fullText, toId);
+  setAgentStatus(toId, "IDLE");
+  updateCtxBar(toId);
+
+  const chainMentions = extractMentions(fullText, toId);
+  for (const nextId of chainMentions) {
+    await sendCrossAgentMessage(toId, nextId, fullText, depth + 1);
   }
 }
 
