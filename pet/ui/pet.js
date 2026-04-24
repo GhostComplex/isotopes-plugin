@@ -129,6 +129,7 @@ function addGroupMessage(role, text, fromAgentId) {
 }
 
 async function sendGroupMessage(text) {
+  abortChain = false;
   addGroupMessage("user", text);
   groupDisplayMessages.push({ className: "msg user", text });
   saveGroupState();
@@ -136,12 +137,30 @@ async function sendGroupMessage(text) {
   const gt = agentTabs["group"];
   if (gt) { gt.input.disabled = true; gt.form.querySelector("button").disabled = true; }
 
-  const activeAgents = Object.keys(AGENTS).filter(id => !mutedAgents.has(id));
+  // Only send to @mentioned agents; if none mentioned, send to all unmuted
+  let targetAgents = extractMentions(text, null).filter(id => !mutedAgents.has(id));
+  if (targetAgents.length === 0) {
+    targetAgents = Object.keys(AGENTS).filter(id => !mutedAgents.has(id));
+  }
 
-  for (const agentId of activeAgents) {
+  await processGroupAgents(targetAgents, text, gt);
+
+  groupHistory.push({ sender: "USER", body: text });
+  while (groupHistory.length > MAX_GROUP_HISTORY) groupHistory.shift();
+  saveGroupState();
+
+  updateAllCtxBars();
+  if (gt) { gt.input.disabled = false; gt.form.querySelector("button").disabled = false; gt.input.focus(); }
+}
+
+async function processGroupAgents(agentIds, triggerText, gt, depth = 0) {
+  if (depth > MAX_MENTION_DEPTH || abortChain) return;
+
+  for (const agentId of agentIds) {
+    if (abortChain) return;
     const sessionId = await ensureSession(agentId);
     setAgentStatus(agentId, "CHAT");
-    const enrichedText = buildGroupContext(text);
+    const enrichedText = buildGroupContext(triggerText);
 
     const assistantDiv = addGroupMessage("assistant", "", agentId);
     let fullText = "";
@@ -196,17 +215,15 @@ async function sendGroupMessage(text) {
       while (groupHistory.length > MAX_GROUP_HISTORY) groupHistory.shift();
       groupDisplayMessages.push({ className: `msg assistant msg-${agentId}`, text: assistantDiv.textContent });
       saveGroupState();
-      showBubble(fullText, agentId);
+      showBubble(fullText, agentId, "ai");
+
+      const chainMentions = extractMentions(fullText, agentId).filter(id => !mutedAgents.has(id));
+      if (chainMentions.length > 0) {
+        await processGroupAgents(chainMentions, fullText, gt, depth + 1);
+      }
     }
     setAgentStatus(agentId, "IDLE");
   }
-
-  groupHistory.push({ sender: "USER", body: text });
-  while (groupHistory.length > MAX_GROUP_HISTORY) groupHistory.shift();
-  saveGroupState();
-
-  updateAllCtxBars();
-  if (gt) { gt.input.disabled = false; gt.form.querySelector("button").disabled = false; gt.input.focus(); }
 }
 
 function openChatTab(tabId) {
@@ -290,15 +307,17 @@ async function ensureSession(agentId) {
   const agent = AGENTS[agentId];
   if (agent.session) return agent.session;
   const sessionKey = `pet:${agentId}`;
-  const res = await fetch(`${API}/api/chat/sessions`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ agentId, sessionKey }),
-  });
-  const data = await res.json();
-  agent.session = data.sessionId;
-  if (data.resumed) await loadHistory(agentId);
-  updateCtxBar(agentId);
+  try {
+    const res = await fetch(`${API}/api/chat/sessions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ agentId, sessionKey }),
+    });
+    const data = await res.json();
+    agent.session = data.sessionId;
+    if (data.resumed) await loadHistory(agentId);
+    updateCtxBar(agentId);
+  } catch (_) {}
   return agent.session;
 }
 
@@ -307,6 +326,7 @@ async function loadHistory(agentId) {
   if (!agent.session) return;
   try {
     const res = await fetch(`${API}/api/chat/sessions/${agent.session}/messages`);
+    if (!res.ok) return;
     const data = await res.json();
     if (!data.messages?.length) return;
     const t = agentTabs[agentId];
@@ -333,6 +353,7 @@ function addMessage(role, text, agentId) {
 }
 
 async function sendMessage(agentId, text) {
+  abortChain = false;
   const sessionId = await ensureSession(agentId);
   addMessage("user", text, agentId);
 
@@ -380,7 +401,7 @@ async function sendMessage(agentId, text) {
     assistantDiv.textContent += " [ERR]";
   }
 
-  if (fullText) showBubble(fullText, agentId);
+  if (fullText) showBubble(fullText, agentId, "ai");
   setAgentStatus(agentId, "IDLE");
   updateCtxBar(agentId);
   if (t) { t.input.disabled = false; t.form.querySelector("button").disabled = false; t.input.focus(); }
@@ -421,7 +442,8 @@ function handleSSE(agentId, event, data, assistantDiv) {
 // ======== Cross-agent @mention ========
 
 const MENTION_RE = /@(eous|amillion|penguin)/gi;
-const MAX_MENTION_DEPTH = 3;
+const MAX_MENTION_DEPTH = 10;
+let abortChain = false;
 
 function extractMentions(text, excludeId) {
   const mentions = new Set();
@@ -435,7 +457,7 @@ function extractMentions(text, excludeId) {
 }
 
 async function sendCrossAgentMessage(fromId, toId, text, depth) {
-  if (depth > MAX_MENTION_DEPTH) return;
+  if (depth > MAX_MENTION_DEPTH || abortChain) return;
 
   const sessionId = await ensureSession(toId);
   const fromName = AGENTS[fromId].name;
@@ -483,7 +505,7 @@ async function sendCrossAgentMessage(fromId, toId, text, depth) {
     assistantDiv.textContent += " [ERR]";
   }
 
-  if (fullText) showBubble(fullText, toId);
+  if (fullText) showBubble(fullText, toId, "ai");
   setAgentStatus(toId, "IDLE");
   updateCtxBar(toId);
 
@@ -495,14 +517,17 @@ async function sendCrossAgentMessage(fromId, toId, text, depth) {
 
 let bubbleAgent = null;
 
-function showBubble(text, agentId) {
-  const short = text.length > 30 ? text.slice(0, 27) + "..." : text;
+function showBubble(text, agentId, type = "random") {
+  const maxLen = type === "ai" ? 25 : 30;
+  const short = text.length > maxLen ? text.slice(0, maxLen - 3) + "..." : text;
   bubble.textContent = short;
-  bubble.classList.remove("hidden");
+  bubble.classList.remove("hidden", "bubble-ai", "bubble-random");
+  bubble.classList.add(type === "ai" ? "bubble-ai" : "bubble-random");
   bubbleAgent = agentId || null;
   positionBubble();
   clearTimeout(bubbleTimer);
-  bubbleTimer = setTimeout(() => { bubble.classList.add("hidden"); bubbleAgent = null; }, 4000);
+  const duration = type === "ai" ? 6000 : 3000;
+  bubbleTimer = setTimeout(() => { bubble.classList.add("hidden"); bubbleAgent = null; }, duration);
 }
 
 function positionBubble() {
@@ -524,6 +549,7 @@ async function updateCtxBar(agentId) {
   if (!agent.session) return;
   try {
     const res = await fetch(`${API}/api/chat/sessions/${agent.session}/messages`);
+    if (!res.ok) return;
     const data = await res.json();
     const count = data.messages?.length || 0;
     const used = Math.min(100, (count / MAX_CTX_MESSAGES) * 100);
@@ -574,6 +600,7 @@ document.querySelectorAll(".agent-slot").forEach(slot => {
 });
 
 clearBtn.addEventListener("click", () => {
+  abortChain = true;
   Object.entries(AGENTS).forEach(([id, a]) => {
     if (a.session) fetch(`${API}/api/chat/sessions/${a.session}`, { method: "DELETE" }).catch(() => {});
     a.session = null;
@@ -657,21 +684,52 @@ Object.keys(AGENTS).forEach(id => {
   roamState[id] = { x: 0, y: 0, targetX: 0, targetY: 0, paused: false, hovered: false, initialized: false };
 });
 
+function findSafePosition(w, h) {
+  const margin = 20;
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const x = margin + Math.random() * (w - PET_W - margin * 2);
+    const y = margin + Math.random() * (h - PET_H - margin * 2);
+    if (!hitsBuilding(x, y)) return { x, y };
+  }
+  return { x: w / 2 - PET_W / 2, y: h / 2 - PET_H / 2 };
+}
+
+function findPositionNearBuilding(bldgName, w, h) {
+  const b = buildingBoxes.find(box => box.name === bldgName);
+  if (!b) return findSafePosition(w, h);
+  const pad = 40;
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const x = b.x + b.w / 2 - PET_W / 2 + (Math.random() - 0.5) * (b.w + pad * 2);
+    const y = b.y + b.h + pad * 0.5 + Math.random() * pad;
+    if (x >= 0 && y >= 0 && x <= w - PET_W && y <= h - PET_H && !hitsBuilding(x, y)) return { x, y };
+  }
+  return findSafePosition(w, h);
+}
+
 function initRoamPositions() {
   const container = document.getElementById("agents-row");
   if (!container) return;
   const rect = container.getBoundingClientRect();
   const w = rect.width;
   const h = rect.height;
+  updateBuildingBoxes();
   const ids = Object.keys(AGENTS);
-  ids.forEach((id, i) => {
+  const msAgent = ids[Math.floor(Math.random() * ids.length)];
+  ids.forEach((id) => {
     const s = roamState[id];
     if (!s.initialized) {
-      s.x = (w / (ids.length + 1)) * (i + 1) - PET_W / 2;
-      s.y = h / 2 - PET_H / 2 + (Math.random() - 0.5) * 60;
+      const pos = id === msAgent ? findPositionNearBuilding("bldg-arcade", w, h) : findSafePosition(w, h);
+      s.x = pos.x;
+      s.y = pos.y;
       s.targetX = s.x;
       s.targetY = s.y;
       s.initialized = true;
+      if (id === msAgent) {
+        setTimeout(() => {
+          const msgs = BUILDING_MESSAGES["bldg-arcade"];
+          showBubble(msgs[Math.floor(Math.random() * msgs.length)], id);
+        }, 500);
+      }
     }
     applyPosition(id);
   });
@@ -740,9 +798,23 @@ function checkCollisions() {
 }
 
 function roamTick() {
+  const container = document.getElementById("agents-row");
+  const cw = container ? container.getBoundingClientRect().width : 800;
+  const ch = container ? container.getBoundingClientRect().height : 600;
+
   Object.keys(AGENTS).forEach(id => {
     const s = roamState[id];
     if (s.paused || s.hovered) return;
+
+    // Escape if stuck inside a building
+    if (hitsBuilding(s.x, s.y)) {
+      const pos = findSafePosition(cw, ch);
+      s.x = pos.x;
+      s.y = pos.y;
+      applyPosition(id);
+      pickNewTarget(id);
+      return;
+    }
 
     const dx = s.targetX - s.x;
     const dy = s.targetY - s.y;

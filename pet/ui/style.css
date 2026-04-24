@@ -1445,6 +1445,20 @@ body {
 }
 #speech-bubble.hidden { opacity: 0; }
 
+#speech-bubble.bubble-ai {
+  font-size: 13px;
+  color: var(--orange);
+  border-color: rgba(77,255,124,0.3);
+  text-shadow: 0 0 8px rgba(255,106,47,0.3);
+  box-shadow: 0 0 16px rgba(77,255,124,0.1);
+  max-width: 260px;
+  padding: 12px 20px;
+}
+
+#speech-bubble.bubble-random {
+  font-size: 11px;
+}
+
 /* ======== FOOTER ======== */
 
 #footer {
