@@ -1369,6 +1369,46 @@ body {
   opacity: 0.85;
 }
 
+/* Collapsible tool call messages */
+.msg.tool-collapsible {
+  padding: 0;
+  border-color: rgba(77,255,124,0.15);
+  background: rgba(77,255,124,0.03);
+}
+.tool-header {
+  padding: 4px 10px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--green-dim);
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tool-header:hover {
+  color: var(--green);
+}
+.tool-detail {
+  display: none;
+  padding: 4px 10px 6px;
+  font-size: 9px;
+  color: var(--text-dim);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.tool-collapsible.expanded .tool-detail {
+  display: block;
+}
+.tool-collapsible.tool-error .tool-header {
+  color: #ff5f57;
+}
+.tool-collapsible.tool-error .tool-detail {
+  color: #ff5f57;
+}
+
 /* Group chat agent-colored messages */
 .msg.msg-eous {
   border-left: 3px solid var(--green);

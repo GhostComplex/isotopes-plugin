@@ -12,7 +12,7 @@ const SLIDES = [
     num: 2,
     title: "ISOTOPES 是什么",
     content: [
-      "一个轻量、可自托管、高度可定制、面向多 Agent 协作和自身代码 / Prompt 迭代的 AI agent framework。"
+      "个人定制版 OpenClaw，轻量 / 可定制 / 安全 / 合规"
     ],
     tags: [
       { label: "RUNTIME", desc: "多 Agent Runtime" },
@@ -132,7 +132,7 @@ const SLIDES = [
     title: "PHASE 2: CO-EVOLUTION",
     subtitle: "当系统开始运行在自己的代码上，关键问题变成「能不能稳定地改自己」。",
     stats: [
-      { value: "4 天", label: "v0.2.0 → v0.1.0" },
+      { value: "4 天", label: "" },
       { value: "60+", label: "PRs merged" },
       { value: "817→1973", label: "tests 增长" }
     ],
@@ -163,8 +163,8 @@ const SLIDES = [
     title: "PHASE 3: FULL AUTONOMY",
     subtitle: 'Tech Lead 和 Dev 都跑在 <span class="hl-orange">Isotopes</span> 上，<span class="hl-orange">Isotopes</span> 自己在写自己。',
     agents: [
-      { name: "Major", role: "Isotopes / Lead", tasks: ["拆 issue / review PR", "管理节奏 / 质量把关", "监控 Fairy 状态"] },
-      { name: "Fairy", role: "Isotopes / Dev", tasks: ["改自己代码 / 跑测试", "开 PR / spawn subagent", "监控 Major 状态"] }
+      { name: "Lead", role: "Isotopes / Lead", tasks: ["拆 issue / review PR", "管理节奏 / 质量把关", "监控 Dev 状态"] },
+      { name: "Dev", role: "Isotopes / Dev", tasks: ["改自己代码 / 跑测试", "开 PR / spawn subagent", "监控 Lead 状态"] }
     ],
     note: "",
     points: [

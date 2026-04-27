@@ -166,7 +166,7 @@ async function processGroupAgents(agentIds, triggerText, gt, depth = 0) {
     let fullText = "";
 
     try {
-      const res = await fetch(`${API}/api/chat/sessions/${sessionId}/message`, {
+      const res = await fetch(`${API}/api/sessions/${agentId}/${sessionId}/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: enrichedText }),
@@ -197,6 +197,18 @@ async function processGroupAgents(agentIds, triggerText, gt, depth = 0) {
             } else if (eventType === "tool_call") {
               if (data.toolName === "pet_action") {
                 playAction(agentId, data.args?.action || "bounce");
+              } else if (!PET_TOOLS.has(data.toolName)) {
+                const tcDiv = addToolCallMessage(agentId, data.toolName, data.args);
+                if (data.toolCallId) pendingToolCalls[data.toolCallId] = tcDiv;
+              }
+            } else if (eventType === "tool_result") {
+              const pending = data.toolCallId && pendingToolCalls[data.toolCallId];
+              if (pending) {
+                updateToolResult(pending, data.toolName, data.result, data.isError);
+                delete pendingToolCalls[data.toolCallId];
+              } else if (!PET_TOOLS.has(data.toolName)) {
+                const tcDiv = addToolCallMessage(agentId, data.toolName, {});
+                updateToolResult(tcDiv, data.toolName, data.result, data.isError);
               }
             }
             if (eventType === "text_delta") fullText = assistantDiv._rawText;
@@ -308,13 +320,13 @@ async function ensureSession(agentId) {
   if (agent.session) return agent.session;
   const sessionKey = `pet:${agentId}`;
   try {
-    const res = await fetch(`${API}/api/chat/sessions`, {
+    const res = await fetch(`${API}/api/sessions/${agentId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ agentId, sessionKey }),
+      body: JSON.stringify({ sessionKey }),
     });
     const data = await res.json();
-    agent.session = data.sessionId;
+    agent.session = data.key;
     if (data.resumed) await loadHistory(agentId);
     updateCtxBar(agentId);
   } catch (_) {}
@@ -325,17 +337,50 @@ async function loadHistory(agentId) {
   const agent = AGENTS[agentId];
   if (!agent.session) return;
   try {
-    const res = await fetch(`${API}/api/chat/sessions/${agent.session}/messages`);
+    const res = await fetch(`${API}/api/sessions/${agentId}/${agent.session}/messages`);
     if (!res.ok) return;
     const data = await res.json();
     if (!data.messages?.length) return;
     const t = agentTabs[agentId];
     if (t) t.messages.innerHTML = "";
+    const historyToolDivs = {};
     for (const msg of data.messages) {
+      const content = msg.content;
       if (msg.role === "user") {
-        addMessage("user", msg.content, agentId);
-      } else if (msg.role === "assistant" && msg.content) {
-        addMessage("assistant", msg.content, agentId);
+        const text = typeof content === "string" ? content
+          : Array.isArray(content) ? content.filter(b => b.type === "text").map(b => b.text).join("") : "";
+        if (text) addMessage("user", text, agentId);
+      } else if (msg.role === "assistant") {
+        if (!Array.isArray(content)) {
+          if (content) addMessage("assistant", String(content), agentId);
+          continue;
+        }
+        let text = "";
+        for (const block of content) {
+          if (block.type === "text") {
+            text += block.text;
+          } else if (block.type === "tool_use" || block.type === "toolCall") {
+            const toolName = block.name;
+            const toolArgs = block.input || block.arguments || {};
+            const toolId = block.id;
+            if (PET_TOOLS.has(toolName)) {
+              const label = toolName === "set_pet_mood" ? `MOOD → ${(toolArgs?.mood || "").toUpperCase()}`
+                : `ACT → ${(toolArgs?.action || "").toUpperCase()}`;
+              addMessage("tool", `♦ ${AGENTS[agentId].name} ${label}`, agentId);
+            } else {
+              const div = addToolCallMessage(agentId, toolName, toolArgs);
+              if (toolId) historyToolDivs[toolId] = div;
+            }
+          }
+        }
+        if (text) addMessage("assistant", text, agentId);
+      } else if (msg.role === "toolResult") {
+        const div = msg.toolCallId && historyToolDivs[msg.toolCallId];
+        const resultText = Array.isArray(msg.content) ? msg.content.filter(b => b.type === "text").map(b => b.text).join("") : String(msg.content || "");
+        if (div) {
+          updateToolResult(div, msg.toolName, resultText, msg.isError);
+          delete historyToolDivs[msg.toolCallId];
+        }
       }
     }
   } catch (_) {}
@@ -352,6 +397,46 @@ function addMessage(role, text, agentId) {
   return div;
 }
 
+const PET_TOOLS = new Set(["set_pet_mood", "pet_action"]);
+const pendingToolCalls = {};
+
+function addToolCallMessage(agentId, toolName, args) {
+  const t = agentTabs[agentId];
+  if (!t) return null;
+  const div = document.createElement("div");
+  div.className = "msg tool tool-collapsible";
+
+  const header = document.createElement("div");
+  header.className = "tool-header";
+  const argsShort = Object.entries(args || {}).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(", ");
+  header.textContent = `▶ ${toolName}(${argsShort})`;
+
+  const detail = document.createElement("div");
+  detail.className = "tool-detail";
+  detail.textContent = "running...";
+
+  header.addEventListener("click", () => {
+    div.classList.toggle("expanded");
+    header.textContent = header.textContent.replace(/^[▶▼]/, div.classList.contains("expanded") ? "▼" : "▶");
+  });
+
+  div.appendChild(header);
+  div.appendChild(detail);
+  t.messages.appendChild(div);
+  t.messages.scrollTop = t.messages.scrollHeight;
+  return div;
+}
+
+function updateToolResult(div, toolName, result, isError) {
+  if (!div) return;
+  const detail = div.querySelector(".tool-detail");
+  if (!detail) return;
+  const label = isError ? "ERR" : "OK";
+  const text = (typeof result === "object" && result !== null) ? JSON.stringify(result, null, 2) : (result || "(empty)");
+  detail.textContent = `[${label}] ${text}`;
+  if (isError) div.classList.add("tool-error");
+}
+
 async function sendMessage(agentId, text) {
   abortChain = false;
   const sessionId = await ensureSession(agentId);
@@ -365,7 +450,7 @@ async function sendMessage(agentId, text) {
   let fullText = "";
 
   try {
-    const res = await fetch(`${API}/api/chat/sessions/${sessionId}/message`, {
+    const res = await fetch(`${API}/api/sessions/${agentId}/${sessionId}/message`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: text }),
@@ -428,9 +513,27 @@ function handleSSE(agentId, event, data, assistantDiv) {
       } else if (data.toolName === "pet_action") {
         playAction(agentId, data.args?.action || "bounce");
         addMessage("tool", `♦ ${AGENTS[agentId].name} ACT → ${(data.args?.action || "").toUpperCase()}`, agentId);
+      } else {
+        const div = addToolCallMessage(agentId, data.toolName, data.args);
+        if (data.toolCallId) pendingToolCalls[data.toolCallId] = div;
       }
       break;
-    case "tool_result":
+    case "tool_result": {
+      const pending = data.toolCallId && pendingToolCalls[data.toolCallId];
+      if (pending) {
+        updateToolResult(pending, data.toolName, data.result, data.isError);
+        delete pendingToolCalls[data.toolCallId];
+      } else if (PET_TOOLS.has(data.toolName)) {
+        if (data.result) {
+          const label = data.isError ? "ERR" : "OK";
+          addMessage("tool", `♦ ${AGENTS[agentId].name} ${data.toolName} → [${label}] ${data.result}`, agentId);
+        }
+      } else {
+        const div = addToolCallMessage(agentId, data.toolName, {});
+        updateToolResult(div, data.toolName, data.result, data.isError);
+      }
+      break;
+    }
     case "agent_end":
       break;
     case "error":
@@ -471,7 +574,7 @@ async function sendCrossAgentMessage(fromId, toId, text, depth) {
 
   try {
     const prompt = `[Message from ${fromName} to you]\n${text}`;
-    const res = await fetch(`${API}/api/chat/sessions/${sessionId}/message`, {
+    const res = await fetch(`${API}/api/sessions/${toId}/${sessionId}/message`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: prompt }),
@@ -548,7 +651,7 @@ async function updateCtxBar(agentId) {
   const agent = AGENTS[agentId];
   if (!agent.session) return;
   try {
-    const res = await fetch(`${API}/api/chat/sessions/${agent.session}/messages`);
+    const res = await fetch(`${API}/api/sessions/${agentId}/${agent.session}/messages`);
     if (!res.ok) return;
     const data = await res.json();
     const count = data.messages?.length || 0;
@@ -602,7 +705,7 @@ document.querySelectorAll(".agent-slot").forEach(slot => {
 clearBtn.addEventListener("click", () => {
   abortChain = true;
   Object.entries(AGENTS).forEach(([id, a]) => {
-    if (a.session) fetch(`${API}/api/chat/sessions/${a.session}`, { method: "DELETE" }).catch(() => {});
+    if (a.session) fetch(`${API}/api/sessions/${id}/${a.session}`, { method: "DELETE" }).catch(() => {});
     a.session = null;
   });
   Object.values(agentTabs).forEach(t => t.messages.innerHTML = "");
