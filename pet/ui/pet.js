@@ -926,16 +926,6 @@ function roamTick() {
     const s = roamState[id];
     if (s.paused || s.hovered) return;
 
-    // Escape if stuck inside a building
-    if (hitsBuilding(s.x, s.y)) {
-      const pos = findSafePosition(cw, ch);
-      s.x = pos.x;
-      s.y = pos.y;
-      applyPosition(id);
-      pickNewTarget(id);
-      return;
-    }
-
     const dx = s.targetX - s.x;
     const dy = s.targetY - s.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
