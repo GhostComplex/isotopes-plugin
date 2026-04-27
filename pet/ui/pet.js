@@ -768,11 +768,28 @@ function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
   return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 }
 
+const BUILDING_PAD = 8;
 function hitsBuilding(px, py) {
   for (const b of buildingBoxes) {
-    if (rectsOverlap(px, py, PET_W, PET_H, b.x, b.y, b.w, b.h)) return true;
+    if (rectsOverlap(
+      px, py, PET_W, PET_H,
+      b.x - BUILDING_PAD, b.y - BUILDING_PAD,
+      b.w + BUILDING_PAD * 2, b.h + BUILDING_PAD * 2
+    )) return true;
   }
   return false;
+}
+
+function pathClear(x0, y0, x1, y1) {
+  const dx = x1 - x0, dy = y1 - y0;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const step = Math.max(8, PET_W / 2);
+  const n = Math.max(1, Math.ceil(dist / step));
+  for (let i = 1; i <= n; i++) {
+    const t = i / n;
+    if (hitsBuilding(x0 + dx * t, y0 + dy * t)) return false;
+  }
+  return true;
 }
 
 function nearbyBuilding(px, py) {
@@ -847,7 +864,7 @@ function pickNewTarget(agentId) {
   for (let attempt = 0; attempt < 20; attempt++) {
     const tx = margin + Math.random() * (rect.width - PET_W - margin * 2);
     const ty = margin + Math.random() * (rect.height - PET_H - margin * 2);
-    if (!hitsBuilding(tx, ty)) {
+    if (!hitsBuilding(tx, ty) && pathClear(s.x, s.y, tx, ty)) {
       s.targetX = tx;
       s.targetY = ty;
       return;
@@ -949,7 +966,15 @@ function roamTick() {
     const ny = s.y + vy;
 
     if (hitsBuilding(nx, ny)) {
-      pickNewTarget(id);
+      const blockX = hitsBuilding(nx, s.y);
+      const blockY = hitsBuilding(s.x, ny);
+      if (blockX && blockY) {
+        pickNewTarget(id);
+        return;
+      }
+      s.x = blockX ? s.x : nx;
+      s.y = blockY ? s.y : ny;
+      applyPosition(id);
       return;
     }
 
