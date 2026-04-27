@@ -969,7 +969,11 @@ function roamTick() {
       const blockX = hitsBuilding(nx, s.y);
       const blockY = hitsBuilding(s.x, ny);
       if (blockX && blockY) {
-        pickNewTarget(id);
+        const el = getSlotElements(id);
+        if (el) {
+          el.slot.classList.remove("walking");
+          setAgentGif(id, "idel");
+        }
         return;
       }
       s.x = blockX ? s.x : nx;
